@@ -5,6 +5,9 @@ GameController::GameController() {
 	m_mesh = { };
 }
 
+GameController::~GameController() {
+}
+
 void GameController::Initialize() {
 	GLFWwindow* window = WindowController::GetInstance().GetWindow(); // Call this first, as it creates a window required by GLEW
 	M_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW."); // Initialize GLEW
