@@ -3,7 +3,7 @@
 WindowController::WindowController(){
 	m_window = nullptr;
 }
-
+//
 WindowController::~WindowController() {
 	if (m_window != nullptr) {
 		glfwTerminate();
