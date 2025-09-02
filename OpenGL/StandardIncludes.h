@@ -7,7 +7,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #define M_ASSERT(_cond, _msg) \
-	if(!(_cond)) {OutputDebugStringA(_msg); std::abort(); glfwTerminate(); 
+	if(!(_cond)) {OutputDebugStringA(_msg); std::abort(); glfwTerminate(); } 
 #endif 
 
 // Openg GL/Helper headers
