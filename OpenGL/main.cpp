@@ -5,7 +5,7 @@
 
 int main(void)
 {
-    GameController::GetInstance().Initialize();
+	GameController::GetInstance().Initialize();
     GameController::GetInstance().RunGame();
 	return 0;
 }

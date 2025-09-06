@@ -16,8 +16,8 @@ public:
 	void Render();
 
 private:
-	GLuint m_vertexBuffer;
-	std::vector<GLfloat> m_vertexData;
+	GLuint m_vertexBuffer; //this is held on the VRAM
+	std::vector<GLfloat> m_vertexData; //this is held on the RAM
 };
 
 #endif // MESH_H
