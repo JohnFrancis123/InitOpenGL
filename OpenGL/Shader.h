@@ -8,7 +8,7 @@ class Shader
 public:
 	// Constructors / Destructors
 	Shader();
-	virtual ~Shader();
+	virtual ~Shader() { }
 
 	// Accessors
 	GLuint GetProgramID() { return m_programID; }

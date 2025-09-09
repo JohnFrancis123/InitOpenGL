@@ -2,6 +2,7 @@
 #include "WindowController.h"
 
 GameController::GameController() {
+	m_shader = { };
 	m_mesh = { }; //default initialization, where m_mesh is an empty Mesh object
 }
 
@@ -16,8 +17,12 @@ void GameController::Initialize() {
 }
 
 void GameController::RunGame() {
+	// Create and compile our GLSL program from the shaders
+	m_shader = Shader();
+	m_shader.LoadShaders("SimpleVertexShader.vertexshader", "SimpleFragmentShader.fragmentshader");
+
 	m_mesh = Mesh(); //re-initialize m_mesh to ensure it's a fresh object
-	m_mesh.Create(); //creating the mesh, which sets up its vertex buffer and data
+	m_mesh.Create(&m_shader); //creating the mesh, which sets up its vertex buffer and data
 	
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
@@ -30,4 +35,5 @@ void GameController::RunGame() {
 		glfwWindowShouldClose(win) == 0); //Check if the window was closed
 
 	m_mesh.Cleanup(); //cleaning up the mesh, which deletes its vertex buffer
+	m_shader.Cleanup(); //cleaning up the shader, which deletes its program
 }
