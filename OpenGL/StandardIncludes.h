@@ -3,6 +3,8 @@
 
 // include standard headers
 #include <vector> //same as a list, but implemented as a dynamic array
+#include <string>
+#include <fstream>
 
 #ifdef _WIN32
 #include <Windows.h>
