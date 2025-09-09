@@ -2,6 +2,7 @@
 #define GAMECONTROLLER_H
 
 #include "StandardIncludes.h"
+#include "Shader.h"
 #include "Mesh.h"
 
 class GameController : public Singleton<GameController>
@@ -14,6 +15,7 @@ public:
 	void Initialize();
 	void RunGame();
 private:
+	Shader m_shader;
 	Mesh m_mesh;
 };
 

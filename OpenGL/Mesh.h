@@ -2,6 +2,7 @@
 #define MESH_H
 
 #include "StandardIncludes.h"
+class Shader;
 
 class Mesh
 {
@@ -11,11 +12,12 @@ public:
 	virtual ~Mesh();
 
 	// Methods
-	void Create();
+	void Create(Shader* _shader);
 	void Cleanup();
 	void Render();
 
 private:
+	Shader* m_shader; //the shader that will be used to render this mesh
 	GLuint m_vertexBuffer; //this is held on the VRAM
 	std::vector<GLfloat> m_vertexData; //this is held on the RAM
 };
