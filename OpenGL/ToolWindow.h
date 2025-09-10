@@ -48,11 +48,19 @@ namespace OpenGL {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->components = gcnew System::ComponentModel::Container();
-			this->Size = System::Drawing::Size(300,300);
-			this->Text = L"ToolWindow";
-			this->Padding = System::Windows::Forms::Padding(0);
+			this->SuspendLayout();
+			// 
+			// ToolWindow
+			// 
+			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->ClientSize = System::Drawing::Size(282, 253);
+			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedToolWindow;
+			this->Name = L"ToolWindow";
+			this->Text = L"ToolWindow";
+			this->TopMost = true;
+			this->ResumeLayout(false);
+
 		}
 #pragma endregion
 	};
