@@ -23,7 +23,7 @@ void Mesh::Cleanup() {
 	glDeleteBuffers(1, &m_vertexBuffer);
 }
 
-void Mesh::Render() {
+void Mesh::Render(glm::mat4 _wvp) {
 	glUseProgram(m_shader->GetProgramID()); // Use our shader
 
 
@@ -35,7 +35,10 @@ void Mesh::Render() {
 		GL_FALSE, // normalized?
 		0, // stride
 		(void*)0); // array buffer offset
+
+	_wvp *= m_world;
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+	glUniformMatrix4fv(m_shader->GetAttrWVP(), 1, GL_FALSE, &_wvp[0][0]);
 	// Draw the Traingle
 	glDrawArrays(GL_TRIANGLES, 0, 3); //starting from vertex 0; 3 vertices = 1 triangle
 	glDisableVertexAttribArray(m_shader->GetAttrVertices());
