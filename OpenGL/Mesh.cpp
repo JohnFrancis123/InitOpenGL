@@ -4,6 +4,7 @@
 Mesh::Mesh() {
 	m_shader = nullptr;
 	m_vertexBuffer = 0;
+	m_world = glm::mat4(1.0f);
 }
 
 Mesh::~Mesh() {
