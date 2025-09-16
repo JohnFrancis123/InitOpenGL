@@ -5,6 +5,7 @@
 
 GameController::GameController() {
 	m_shader = { };
+	m_camera = { };
 	m_mesh = { }; //default initialization, where m_mesh is an empty Mesh object
 }
 
@@ -16,13 +17,16 @@ void GameController::Initialize() {
 	M_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW."); // Initialize GLEW
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue background
+
+	// Create a default perspective camera
+	m_camera = Camera(WindowController::GetInstance().GetResolution());
 }
 
 void GameController::RunGame() {
 	
 	// Show the C++/CLI tool window
-	OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
-	window->Show();
+	//OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
+	//window->Show();
 
 	// Create and compile our GLSL program from the shaders
 	m_shader = Shader();
@@ -34,20 +38,12 @@ void GameController::RunGame() {
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
 	{
-		System::Windows::Forms::Application::DoEvents(); // Handle C++/CLI form events
-
-		GLint loc = glGetUniformLocation(m_shader.GetProgramID(), "RenderRedChannel");
-		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderRedChannel);
-		loc = glGetUniformLocation(m_shader.GetProgramID(), "RenderGreenChannel");
-		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderGreenChannel);
-		loc = glGetUniformLocation(m_shader.GetProgramID(), "RenderBlueChannel");
-		glUniform1i(loc, (int)OpenGL::ToolWindow::RenderBlueChannel);
-
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
-		m_mesh.Render(); //rendering the mesh
-		glfwSwapBuffers(win); //swaping the back buffer to the front to display the rendered image
+		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input
-	} while (glfwGetKey(win, GLFW_KEY_ESCAPE) != GLFW_PRESS && //Check if the ESC key is pressed
+	} 
+	while (glfwGetKey(win, GLFW_KEY_ESCAPE) != GLFW_PRESS && //Check if the ESC key is pressed
 		glfwWindowShouldClose(win) == 0); //Check if the window was closed
 
 	m_mesh.Cleanup(); //cleaning up the mesh, which deletes its vertex buffer

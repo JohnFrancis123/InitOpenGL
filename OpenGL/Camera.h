@@ -12,7 +12,7 @@ public:
 	virtual ~Camera();
 
 	// Accessors
-	glm::mat4 GetProejction() { return m_projection; }
+	glm::mat4 GetProjection() { return m_projection; }
 	glm::mat4 GetView() { return m_view; }
 
 private:

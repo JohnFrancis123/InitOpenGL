@@ -6,12 +6,12 @@ Camera::Camera() {
 }
 
 Camera::Camera(Resolution _screenResolution) {
-	// Projection Matrix : 45 deg FOV, 4:3 ratio, display range : 0.1 unit <-> 100 units
+	// Projection Matrix : 45 deg FOV, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	m_projection = glm::perspective(glm::radians(45.0f),
 									(float)_screenResolution.m_width /
 									(float)_screenResolution.m_height,
 									0.1f,
-									100.0f);
+									1000.0f);
 	// Or for an ortho camera: 
 	//glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f); // In world coordinates
 
