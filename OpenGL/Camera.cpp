@@ -12,6 +12,7 @@ Camera::Camera(Resolution _screenResolution) {
 									(float)_screenResolution.m_height,
 									0.1f,
 									1000.0f);
+
 	// Or for an ortho camera: 
 	//glm::mat4 Projection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.0f, 100.0f); // In world coordinates
 

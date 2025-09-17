@@ -6,7 +6,9 @@
 GameController::GameController() {
 	m_shader = { };
 	m_camera = { };
+	m_camera2 = { };
 	m_mesh = { }; //default initialization, where m_mesh is an empty Mesh object
+	m_effect = 0;
 }
 
 GameController::~GameController() {
@@ -20,6 +22,8 @@ void GameController::Initialize() {
 
 	// Create a default perspective camera
 	m_camera = Camera(WindowController::GetInstance().GetResolution());
+
+	m_camera2 = Camera2(WindowController::GetInstance().GetResolution()); //new camera class.
 }
 
 void GameController::RunGame() {
@@ -39,10 +43,42 @@ void GameController::RunGame() {
 	do
 	{
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
-		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+
+		// if we press a, b, c, or d, we determine where the camera will be or whether will get a fisheye effect (wider fov)
+		if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) {
+			m_effect = 0;
+		}
+		else if (glfwGetKey(win, GLFW_KEY_B) == GLFW_PRESS) {
+			m_effect = 1;
+		}
+		else if (glfwGetKey(win, GLFW_KEY_C) == GLFW_PRESS) {
+			m_effect = 2;
+		}
+		else if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) {
+			m_effect = 3;
+		}
+
+		if (m_effect == 0) {
+			m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+		}
+		else if (m_effect == 1) {
+			m_mesh.Render(m_camera2.GetProjection() * m_camera.GetView());
+		}
+		else if (m_effect == 2) {
+			m_mesh.Render(m_camera.GetProjection() * m_camera2.GetView());
+		}
+		else{
+			m_mesh.Render(m_camera2.GetProjection() * m_camera2.GetView());
+		}
+
+		//m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input
 	} 
+
+
+
+
 	while (glfwGetKey(win, GLFW_KEY_ESCAPE) != GLFW_PRESS && //Check if the ESC key is pressed
 		glfwWindowShouldClose(win) == 0); //Check if the window was closed
 
