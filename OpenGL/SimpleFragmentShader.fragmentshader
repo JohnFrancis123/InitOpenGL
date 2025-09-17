@@ -1,6 +1,6 @@
 #version 120 // OpenGL version 2.1 (minimum requirement)
 
-uniform int RenderRedChannel = 1;
+uniform int RenderRedChannel = 1; // REMOVE THESE VALUES WHEN FINISHED LAB 2
 uniform int RenderGreenChannel = 0;
 uniform int RenderBlueChannel = 0;
 
