@@ -54,6 +54,8 @@ void Mesh::Create(Shader* _shader) {
 	glGenBuffers(1, &m_indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indexData.size() * sizeof(GLubyte), m_indexData.data(), GL_STATIC_DRAW);
+	//NEW. MAY NEED TO DELETE.
+	m_world = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 0.0f));
 }
 
 void Mesh::Render(glm::mat4 _wvp) {
@@ -77,8 +79,23 @@ void Mesh::Render(glm::mat4 _wvp) {
 		GL_FALSE, // normalized?
 		7 * sizeof(float), // stride (7 floats per vertex definition)
 		(void*)(3 * sizeof(float))); // array buffer offset
+	
+	//saving the position as a vec 3
+	glm::vec3 position = glm::vec3(m_world[3]); //column 3 holds translation in glm::mat4
 
-	m_world = glm::rotate(m_world, 0.001f, { 0, 1, 0 });
+	//creating incremental rotation around Y-axis
+	glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), 0.001f, glm::vec3(0.0f, 1.0f, 0.0f));
+
+	//translating to origin, rotating, then translating back to original position
+	glm::mat4 toOrigin = glm::translate(glm::mat4(1.0f), -position);
+	glm::mat4 positionMat = glm::translate(glm::mat4(1.0f), position);
+
+	//applying rotation around current position
+	m_world = positionMat * rotation * toOrigin * m_world;
+
+	
+
+
 	_wvp *= m_world;
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // Bind the vertex buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer); // Bind the index buffer
