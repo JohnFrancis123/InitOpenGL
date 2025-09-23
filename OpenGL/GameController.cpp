@@ -18,7 +18,7 @@ void GameController::Initialize() {
 	GLFWwindow* window = WindowController::GetInstance().GetWindow(); // Call this first, as it creates a window required by GLEW
 	M_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW."); // Initialize GLEW
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
-	glClearColor(0.0f, 0.0f, 0.4f, 0.0f); // Dark blue background
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // Black background
 
 	// Create a default perspective camera
 	m_camera = Camera(WindowController::GetInstance().GetResolution());
@@ -44,32 +44,9 @@ void GameController::RunGame() {
 	{
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
 
-		// if we press a, b, c, or d, we determine where the camera will be or whether will get a fisheye effect (wider fov)
-		if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) {
-			m_effect = 0;
-		}
-		else if (glfwGetKey(win, GLFW_KEY_B) == GLFW_PRESS) {
-			m_effect = 1;
-		}
-		else if (glfwGetKey(win, GLFW_KEY_C) == GLFW_PRESS) {
-			m_effect = 2;
-		}
-		else if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) {
-			m_effect = 3;
-		}
+		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
 
-		if (m_effect == 0) {
-			m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
-		}
-		else if (m_effect == 1) {
-			m_mesh.Render(m_camera2.GetProjection() * m_camera.GetView());
-		}
-		else if (m_effect == 2) {
-			m_mesh.Render(m_camera.GetProjection() * m_camera2.GetView());
-		}
-		else{
-			m_mesh.Render(m_camera2.GetProjection() * m_camera2.GetView());
-		}
+
 
 		//m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image

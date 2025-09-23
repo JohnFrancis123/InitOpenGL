@@ -13,11 +13,12 @@ public:
 	// Accessors
 	GLuint GetProgramID() { return m_programID; }
 	GLuint GetAttrVertices() { return m_attrVertices; }
-
+	GLuint GetAttrColors() { return m_attrColors; }
+	GLuint GetAttrWVP() { return m_attrWVP; }
 	// Methods
 	void LoadShaders(const char* _vertexFilePath, const char* _fragmentFilePath);
 	void Cleanup();
-	GLuint GetAttrWVP() { return m_attrWVP; }
+	
 
 private:
 	// Methods
@@ -29,6 +30,7 @@ private:
 	// Members
 	GLuint m_programID;
 	GLuint m_attrVertices;
+	GLuint m_attrColors;
 	GLuint m_attrWVP;
 	GLint m_result = GL_FALSE;
 	int m_infoLogLength;
