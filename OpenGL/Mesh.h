@@ -19,7 +19,9 @@ public:
 private:
 	Shader* m_shader; //the shader that will be used to render this mesh
 	GLuint m_vertexBuffer; //this is held on the VRAM
-	std::vector<GLfloat> m_vertexData; //this is held on the RAM
+	GLuint m_indexBuffer; // GPU buffer
+	std::vector<GLfloat> m_vertexData; // Store vertex data in RAM
+	std::vector<GLubyte> m_indexData; // Store index data in RAM
 	glm::mat4 m_world;
 };
 
