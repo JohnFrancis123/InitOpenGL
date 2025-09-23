@@ -23,6 +23,6 @@
 #include "Resolution.h"
 #include "Singleton.h"
 
-using namespace std;
+using namespace std; //
 
 #endif // STANDARD_INCLUDES_H
