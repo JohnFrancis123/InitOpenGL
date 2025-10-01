@@ -104,8 +104,8 @@ void Mesh::Render(glm::mat4 _wvp) {
 	glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture());
 	glUniform1i(m_shader->GetSampler2(), 1);
 	
-	glBindTexture(GL_TEXTURE_2D, m_texture.GetTexture());
-	glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture());
+	//glBindTexture(GL_TEXTURE_2D, m_texture.GetTexture());
+	//glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture());
 
 	//glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Draw the triangle
 	glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
