@@ -4,6 +4,7 @@
 Mesh::Mesh() {
 	m_shader = nullptr;
 	m_texture = { };
+	m_texture2 = { };
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_position = { 0, 0, 0 };
@@ -20,6 +21,7 @@ void Mesh::Cleanup() {
 	glDeleteBuffers(1, &m_indexBuffer);
 	glDeleteBuffers(1, &m_vertexBuffer);
 	m_texture.Cleanup();
+	m_texture2.Cleanup();
 }
 
 void Mesh::Create(Shader* _shader) {
@@ -27,12 +29,14 @@ void Mesh::Create(Shader* _shader) {
 
 	m_texture = Texture();
 	m_texture.LoadTexture("../Assets/Textures/Wood.jpg");
+	m_texture2 = Texture();
+	m_texture2.LoadTexture("../Assets/Textures/Emoji.jpg");
 
 	//m_vertexData = { -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f }; //this means 3 vertices, with 3 coordinates (x,y,z) each
 	float a = 26.0f;
 	float b = 42.0f;
 	m_vertexData = {
-		/*    Position   */  /*  RGBA Color  */   /* Texture coords */
+		/*    Position   */  /*  RGB Color  */   /* Texture coords */
 		50.0f, 50.0f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
 		50.0f, -50.0f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // bottom-right
 		-50.0f, -50.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // bottom-left
@@ -69,7 +73,7 @@ void Mesh::Render(glm::mat4 _wvp) {
 	// 2nd attribute buffer : colors
 	glEnableVertexAttribArray(m_shader->GetAttrColors());
 	glVertexAttribPointer(m_shader->GetAttrColors(), // The attirbute we want to configure
-		4, //size (4 components per color value
+		3, //size (3 components per color value
 		GL_FLOAT, // type
 		GL_FALSE, // normalized?
 		8 * sizeof(float), // stride (7 floats per vertex definition)
@@ -82,7 +86,7 @@ void Mesh::Render(glm::mat4 _wvp) {
 		GL_FLOAT, //type
 		GL_FALSE, //normalized?
 		8 * sizeof(float), //stride (8 floats per vertex definition)
-		(void*)(3 * sizeof(float))); // array buffer offset
+		(void*)(6 * sizeof(float))); // array buffer offset
 
 	//4th attribute: WVP
 	m_rotation.y += 0.001f;
@@ -91,7 +95,18 @@ void Mesh::Render(glm::mat4 _wvp) {
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // Bind the vertex buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer); // Bind the index buffer
+	
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texture.GetTexture());
+	glUniform1i(m_shader->GetSampler1(), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture());
+	glUniform1i(m_shader->GetSampler2(), 1);
+	
+	glBindTexture(GL_TEXTURE_2D, m_texture.GetTexture());
+	glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture());
+
 	//glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Draw the triangle
 	glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
 	glDisableVertexAttribArray(m_shader->GetAttrColors());
