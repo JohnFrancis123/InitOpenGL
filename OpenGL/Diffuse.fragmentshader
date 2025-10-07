@@ -10,5 +10,5 @@ uniform sampler2D sampler2;
 
 void main()
 {
-	FragColor = texture(sampelr1, retTexCoord); // Texture only
+	FragColor = texture(sampler1, retTexCoord); // Texture only
 }
