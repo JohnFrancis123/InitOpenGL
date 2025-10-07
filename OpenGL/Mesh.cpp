@@ -86,6 +86,7 @@ void Mesh::Create(Shader* _shader) {
 
 void Mesh::Render(glm::mat4 _wvp) {
 	glUseProgram(m_shader->GetProgramID()); // Use our shader
+	m_shader->SetVec3("AmbientLight", { 0.1f, 0.1f, 0.1f });
 	m_shader->SetVec3("DiffuseColor", { 1.0f, 0.0f, 0.0f });
 
 	// 1st attribute buffer : vertices
