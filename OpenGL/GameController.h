@@ -18,12 +18,11 @@ public:
 	void Initialize();
 	void RunGame();
 private:
-	int m_effect;
-
-	Shader m_shader;
+	Shader m_shaderColor;
+	Shader m_shaderDiffuse;
 	Camera m_camera;
-	Camera2 m_camera2;
-	Mesh m_mesh;
+	Mesh m_meshBox;
+	Mesh m_meshLight;
 };
 
 #endif // GAME_CONTROLLER_H
