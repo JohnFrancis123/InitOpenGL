@@ -23,7 +23,7 @@ public:
 	void Cleanup();
 	
 
-private:
+private: //
 	// Methods
 	void CreateShaderProgram(const char* _vertexFilePath, const char* _fragmentFilePath);
 	GLuint LoadShaderFile(const char* _filePath, GLenum _type);
