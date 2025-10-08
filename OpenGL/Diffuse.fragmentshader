@@ -4,14 +4,14 @@ in vec3 retNormal;
 in vec2 retTexCoord;
 in vec3 retFragPos;
 in vec3 retViewDirection;
-in vec3 retColor; // <--- NEW: Interpolated vertex color for the rainbow effect
+in vec3 retColor; // <--- NEW INPUT: Interpolated vertex color
 
 out vec4 FragColor;
 
 uniform float SpecularStrength;
 uniform vec3 SpecularColor;
 uniform vec3 LightPosition;
-uniform vec3 LightDirection; 
+uniform vec3 LightDirection;
 uniform vec3 LightColor;
 uniform vec3 AmbientLight;
 uniform vec3 DiffuseColor;
@@ -27,11 +27,9 @@ vec3 RgbToYuv(vec3 rgb) {
         vec3(0.587, -0.289, -0.515),
         vec3(0.114, 0.436, -0.100)
     );
-    
     vec3 yuv_components = RGB_TO_YUV_MAT * rgb;
-    yuv_components.y += 0.5;
+    yuv_components.y += 0.5; 
     yuv_components.z += 0.5;
-
     return yuv_components;
 }
 
@@ -41,11 +39,9 @@ vec3 YuvToRgb(vec3 yuv) {
         vec3(0.0, -0.395, 2.032),
         vec3(1.140, -0.581, 0.0)
     );
-    
     vec3 yuv_centered = yuv;
     yuv_centered.y -= 0.5;
     yuv_centered.z -= 0.5;
-    
     return YUV_TO_RGB_MAT * yuv_centered;
 }
 
@@ -57,7 +53,7 @@ void main()
     vec3 objectColor = baseTexColor.rgb;
     vec3 norm = normalize(retNormal); 
 
-    // --- LIGHTING CALCULATION (PHONG) ---
+    // 1. LIGHTING CALCULATION (PHONG)
     vec3 lightDir = normalize(LightPosition - retFragPos); 
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 ambient = AmbientLight * objectColor;
@@ -68,33 +64,29 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0f), SpecularStrength);
     vec3 specular = LightColor * SpecularColor * spec;
     
-    // Final Lit Color (before YUV adjustment)
+    // Final Lit Color (Texture * Lighting)
     vec3 finalLitColor = ambient + diffuse + specular;
 
-    // --- YUV ADJUSTMENT ---
+    // 2. YUV ADJUSTMENT
+    vec3 yuvAdjusted = RgbToYuv(finalLitColor);
 
-    vec3 yuvBase = RgbToYuv(finalLitColor);
-    vec3 yuvAdjusted = yuvBase;
-
-    // 1. Y adjustment (Luminance): Offset
-    yuvAdjusted.x += yuv_sliders.x;
+    yuvAdjusted.x += yuv_sliders.x; // Apply Y adjustment
     
-    // 2. U/V adjustment (Chroma): Multiplier for Saturation/Desaturation
     yuvAdjusted.y -= 0.5;
-    yuvAdjusted.y *= yuv_sliders.y; 
+    yuvAdjusted.y *= yuv_sliders.y; // Apply U adjustment
     yuvAdjusted.y += 0.5;
     
     yuvAdjusted.z -= 0.5;
-    yuvAdjusted.z *= yuv_sliders.z; 
+    yuvAdjusted.z *= yuv_sliders.z; // Apply V adjustment
     yuvAdjusted.z += 0.5;
 
     // Clamp and convert back to RGB
     yuvAdjusted = clamp(yuvAdjusted, 0.0, 1.0);
     vec3 finalRGB = YuvToRgb(yuvAdjusted);
 
-    // --- APPLY RAINBOW EFFECT ---
-    finalRGB *= retColor; // <--- Multiplies the final, adjusted color by the interpolated vertex color
+    // 3. APPLY RAINBOW EFFECT
+    finalRGB *= retColor; // Multiplies the final, adjusted color by the interpolated vertex color
 
-    // Final Output (using the adjusted color and the texture's alpha)
+    // 4. FINAL OUTPUT
     FragColor = vec4(finalRGB, baseTexColor.a);
 }

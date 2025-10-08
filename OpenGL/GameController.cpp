@@ -44,7 +44,7 @@ void GameController::RunGame() {
 	// Create meshes
 	m_meshLight = Mesh(); //re-initialize m_mesh to ensure it's a fresh object
 	m_meshLight.Create(&m_shaderColor); //creating the mesh, which sets up its vertex buffer and data
-	m_meshLight.SetPosition({ 1.0f, 0.5f, 0.5f });
+	m_meshLight.SetPosition({ 1.5f, 0.25f, 0.5f });
 	m_meshLight.SetScale({ 0.1f, 0.1f, 0.1f });
 
 	m_meshBox = Mesh();
@@ -57,19 +57,27 @@ void GameController::RunGame() {
 	do
 	{
 		System::Windows::Forms::Application::DoEvents(); // Handle C++ / CLI form events
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
+		int y = (int)OpenGL::ToolWindow::RenderYChannel; // 0-200
+		int u = (int)OpenGL::ToolWindow::RenderUChannel; // 0-200
+		int v = (int)OpenGL::ToolWindow::RenderVChannel; // 0-200
 
-		int y = (int)OpenGL::ToolWindow::RenderYChannel;
-		int u = (int)OpenGL::ToolWindow::RenderUChannel;
-		int v = (int)OpenGL::ToolWindow::RenderVChannel;
+		// Use a better name to reflect that it holds an offset (X) and multipliers (Y, Z)
+		glm::vec3 yuvParams = { 0, 0, 0 };
 
-		glm::vec3 yuvOffset = { 0, 0, 0 };
+		// 1. Y (Luminance): Offset
+		// Slider 0-200 maps to approx. -0.5 to +0.5 offset in the shader.
+		const float MAX_Y_DEVIATION = 0.5f;
+		yuvParams.x = (static_cast<float>(y) - 100.0f) / 100.0f * MAX_Y_DEVIATION;
 
-		yuvOffset.x = (float)((y - 100.0f) / 100.0f);
-		yuvOffset.y = (float)((u - 100.0f) / 100.0f);
-		yuvOffset.z = (float)((v - 100.0f) / 100.0f);
+		// 2. U and V (Chroma): Multipliers
+		// Slider 0-200 maps to 0.0 to 2.0 multiplier in the shader.
+		yuvParams.y = static_cast<float>(u) / 100.0f; // Multiplier range: 0.0 to 2.0
+		yuvParams.z = static_cast<float>(v) / 100.0f; // Multiplier range: 0.0 to 2.0
 
-		m_meshLight.SetYUVParams(yuvOffset);
+		m_meshLight.SetYUVParams(yuvParams);
+		m_meshBox.SetYUVParams(yuvParams);
 
 		m_meshBox.Render(m_camera.GetProjection() * m_camera.GetView());
 		m_meshLight.Render(m_camera.GetProjection() * m_camera.GetView());
