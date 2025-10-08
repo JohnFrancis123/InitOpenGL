@@ -26,5 +26,5 @@ void main()
 	vec3 color = (lambertian + specular + AmbientLight) * DiffuseColor;
 
 	vec3 outp = clamp(lambertian + AmbientLight, 0.0f, 1.0f) * DiffuseColor;
-	FragColor = vec4(color, 1.0f) * texture(sampler1, retTexCoord); // Calculate final color
+	FragColor = vec4(color, 1.0f) * mix(texture(sampler1, retTexCoord), texture(sampler2, retTexCoord), 0.5); // Calculate final color
 }
