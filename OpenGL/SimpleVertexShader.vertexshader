@@ -2,6 +2,7 @@
 
 in vec3 vertices; // Value sent from application to this attribute
 in vec3 colors; // Input color from application
+in vec3 yuv;
 in vec2 texCoords;
 
 uniform mat4 WVP;

@@ -19,12 +19,22 @@ namespace OpenGL {
 		static bool RenderGreenChannel;
 		static bool RenderBlueChannel;
 
+		static int RenderYChannel;
+		static int RenderUChannel;
+		static int RenderVChannel;
+	private: System::Windows::Forms::TrackBar^ UTrackBar;
+	private: System::Windows::Forms::TrackBar^ VTrackBar;
+	private: System::Windows::Forms::TrackBar^ YTrackBar;
 		ToolWindow(void)
 		{
 			InitializeComponent();
 			RenderRedChannel = checkBoxRedChannel->Checked;
 			RenderGreenChannel = checkBoxGreenChannel->Checked;
 			RenderBlueChannel = checkBoxBlueChannel->Checked;
+
+			RenderYChannel = YTrackBar->Value;
+			RenderUChannel = UTrackBar->Value;
+			RenderVChannel = VTrackBar->Value;
 			//
 			//TODO: Add the constructor code here
 			//
@@ -44,6 +54,7 @@ namespace OpenGL {
 	private: System::Windows::Forms::CheckBox^ checkBoxRedChannel;
 	private: System::Windows::Forms::CheckBox^ checkBoxGreenChannel;
 	private: System::Windows::Forms::CheckBox^ checkBoxBlueChannel;
+
 	protected:
 
 	protected:
@@ -68,6 +79,12 @@ namespace OpenGL {
 			this->checkBoxRedChannel = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxGreenChannel = (gcnew System::Windows::Forms::CheckBox());
 			this->checkBoxBlueChannel = (gcnew System::Windows::Forms::CheckBox());
+			this->YTrackBar = (gcnew System::Windows::Forms::TrackBar());
+			this->UTrackBar = (gcnew System::Windows::Forms::TrackBar());
+			this->VTrackBar = (gcnew System::Windows::Forms::TrackBar());
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->YTrackBar))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->UTrackBar))->BeginInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->VTrackBar))->BeginInit();
 			this->SuspendLayout();
 			// 
 			// checkBoxRedChannel
@@ -103,11 +120,44 @@ namespace OpenGL {
 			this->checkBoxBlueChannel->UseVisualStyleBackColor = true;
 			this->checkBoxBlueChannel->CheckedChanged += gcnew System::EventHandler(this, &ToolWindow::checkBoxBlueChannel_CheckedChanged);
 			// 
+			// YTrackBar
+			// 
+			this->YTrackBar->Location = System::Drawing::Point(27, 93);
+			this->YTrackBar->Maximum = 200;
+			this->YTrackBar->Name = L"YTrackBar";
+			this->YTrackBar->Size = System::Drawing::Size(263, 56);
+			this->YTrackBar->TabIndex = 3;
+			this->YTrackBar->Value = 100;
+			this->YTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::yTrackBar_Scroll);
+			// 
+			// UTrackBar
+			// 
+			this->UTrackBar->Location = System::Drawing::Point(27, 155);
+			this->UTrackBar->Maximum = 200;
+			this->UTrackBar->Name = L"UTrackBar";
+			this->UTrackBar->Size = System::Drawing::Size(263, 56);
+			this->UTrackBar->TabIndex = 4;
+			this->UTrackBar->Value = 100;
+			this->UTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::uTrackBar_Scroll);
+			// 
+			// VTrackBar
+			// 
+			this->VTrackBar->Location = System::Drawing::Point(27, 218);
+			this->VTrackBar->Maximum = 200;
+			this->VTrackBar->Name = L"VTrackBar";
+			this->VTrackBar->Size = System::Drawing::Size(263, 56);
+			this->VTrackBar->TabIndex = 5;
+			this->VTrackBar->Value = 100;
+			this->VTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::vTrackBar_Scroll);
+			// 
 			// ToolWindow
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(282, 253);
+			this->ClientSize = System::Drawing::Size(306, 372);
+			this->Controls->Add(this->VTrackBar);
+			this->Controls->Add(this->UTrackBar);
+			this->Controls->Add(this->YTrackBar);
 			this->Controls->Add(this->checkBoxBlueChannel);
 			this->Controls->Add(this->checkBoxGreenChannel);
 			this->Controls->Add(this->checkBoxRedChannel);
@@ -115,6 +165,9 @@ namespace OpenGL {
 			this->Name = L"ToolWindow";
 			this->Text = L"ToolWindow";
 			this->TopMost = true;
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->YTrackBar))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->UTrackBar))->EndInit();
+			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->VTrackBar))->EndInit();
 			this->ResumeLayout(false);
 			this->PerformLayout();
 
@@ -128,6 +181,16 @@ namespace OpenGL {
 	}
 	private: System::Void checkBoxBlueChannel_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 		RenderBlueChannel = checkBoxBlueChannel->Checked;
+	}
+
+	private: System::Void yTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
+		RenderYChannel = YTrackBar->Value;
+	}
+	private: System::Void uTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
+		RenderUChannel = UTrackBar->Value;
+	}
+	private: System::Void vTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
+		RenderVChannel = VTrackBar->Value;
 	}
 };
 }

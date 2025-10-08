@@ -16,6 +16,10 @@ public:
 	// Methods
 	void Create(Shader* _shader);
 	void Cleanup();
+
+	glm::vec3 ToYuv(glm::vec3(_rgb));
+	glm::vec3 ToRgb(glm::vec3(_yuv));
+
 	void Render(glm::mat4 _wvp);
 
 private:
@@ -28,6 +32,8 @@ private:
 	std::vector<GLubyte> m_indexData; // Store index data in RAM
 	glm::vec3 m_position;
 	glm::vec3 m_rotation;
+
+
 	//glm::mat4 m_world;
 };
 
