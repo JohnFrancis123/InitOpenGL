@@ -3,7 +3,7 @@
 Camera::Camera() {
 	m_projection = { };
 	m_view = { };
-}
+}//
 
 Camera::Camera(Resolution _screenResolution) {
 	// Projection Matrix : 45 deg FOV, 4:3 ratio, display range : 0.1 unit <-> 1000 units
