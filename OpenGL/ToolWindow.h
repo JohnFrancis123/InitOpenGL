@@ -24,6 +24,9 @@ namespace OpenGL {
 		static int RenderVChannel;
 	private: System::Windows::Forms::TrackBar^ UTrackBar;
 	private: System::Windows::Forms::TrackBar^ VTrackBar;
+	private: System::Windows::Forms::Label^ label1;
+	private: System::Windows::Forms::Label^ label2;
+	private: System::Windows::Forms::Label^ label3;
 	private: System::Windows::Forms::TrackBar^ YTrackBar;
 	
 	public:
@@ -37,6 +40,10 @@ namespace OpenGL {
 			RenderYChannel = YTrackBar->Value;
 			RenderUChannel = UTrackBar->Value;
 			RenderVChannel = VTrackBar->Value;
+
+			label1->Text = "Y: " + YTrackBar->Value.ToString() + "%";
+			label2->Text = "U: " + UTrackBar->Value.ToString() + "%";
+			label3->Text = "V: " + VTrackBar->Value.ToString() + "%";
 			//
 			//TODO: Add the constructor code here
 			//
@@ -84,6 +91,9 @@ namespace OpenGL {
 			this->YTrackBar = (gcnew System::Windows::Forms::TrackBar());
 			this->UTrackBar = (gcnew System::Windows::Forms::TrackBar());
 			this->VTrackBar = (gcnew System::Windows::Forms::TrackBar());
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->label2 = (gcnew System::Windows::Forms::Label());
+			this->label3 = (gcnew System::Windows::Forms::Label());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->YTrackBar))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->UTrackBar))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->VTrackBar))->BeginInit();
@@ -124,6 +134,7 @@ namespace OpenGL {
 			// 
 			// YTrackBar
 			// 
+			this->YTrackBar->AccessibleName = L"";
 			this->YTrackBar->Location = System::Drawing::Point(27, 93);
 			this->YTrackBar->Maximum = 200;
 			this->YTrackBar->Name = L"YTrackBar";
@@ -152,11 +163,42 @@ namespace OpenGL {
 			this->VTrackBar->Value = 100;
 			this->VTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::vTrackBar_Scroll);
 			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->Location = System::Drawing::Point(27, 132);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(44, 16);
+			this->label1->TabIndex = 6;
+			this->label1->Text = L"label1";
+			this->label1->Click += gcnew System::EventHandler(this, &ToolWindow::label1_Click);
+			// 
+			// label2
+			// 
+			this->label2->AutoSize = true;
+			this->label2->Location = System::Drawing::Point(30, 196);
+			this->label2->Name = L"label2";
+			this->label2->Size = System::Drawing::Size(44, 16);
+			this->label2->TabIndex = 7;
+			this->label2->Text = L"label2";
+			// 
+			// label3
+			// 
+			this->label3->AutoSize = true;
+			this->label3->Location = System::Drawing::Point(33, 257);
+			this->label3->Name = L"label3";
+			this->label3->Size = System::Drawing::Size(44, 16);
+			this->label3->TabIndex = 8;
+			this->label3->Text = L"label3";
+			// 
 			// ToolWindow
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->ClientSize = System::Drawing::Size(306, 372);
+			this->Controls->Add(this->label3);
+			this->Controls->Add(this->label2);
+			this->Controls->Add(this->label1);
 			this->Controls->Add(this->VTrackBar);
 			this->Controls->Add(this->UTrackBar);
 			this->Controls->Add(this->YTrackBar);
@@ -187,12 +229,23 @@ namespace OpenGL {
 
 	private: System::Void yTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
 		RenderYChannel = YTrackBar->Value;
+		label1->Text = "Y: " + YTrackBar->Value.ToString() + "%";
 	}
 	private: System::Void uTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
 		RenderUChannel = UTrackBar->Value;
+		label2->Text = "U: " + UTrackBar->Value.ToString() + "%";
 	}
 	private: System::Void vTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
 		RenderVChannel = VTrackBar->Value;
+		label3->Text = "V: " + VTrackBar->Value.ToString() + "%";
 	}
+
+
+
+
+private: System::Void label1_Click(System::Object^ sender, System::EventArgs^ e) {
+
+}
+
 };
 }

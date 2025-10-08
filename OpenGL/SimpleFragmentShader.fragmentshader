@@ -27,8 +27,8 @@ vec3 RgbToYuv(vec3 rgb) {
     vec3 yuv_components = RGB_TO_YUV_MAT * rgb;
 
     // Shift U and V from the centered range (around 0.0) to 0.0-1.0 range
-    //yuv_components.y += 0.5;
-    //yuv_components.z += 0.5;
+    yuv_components.y += 0.5;
+    yuv_components.z += 0.5;
 
     return yuv_components;
 }
@@ -45,8 +45,8 @@ vec3 YuvToRgb(vec3 yuv) {
     );
     
     vec3 yuv_centered = yuv;
-    //yuv_centered.y -= 0.5;
-    //yuv_centered.z -= 0.5;
+    yuv_centered.y -= 0.5;
+    yuv_centered.z -= 0.5;
     return YUV_TO_RGB_MAT * yuv_centered;
 }
 
