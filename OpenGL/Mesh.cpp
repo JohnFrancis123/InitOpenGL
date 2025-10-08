@@ -39,13 +39,13 @@ void Mesh::Create(Shader* _shader) {
 	m_texture2.LoadTexture("../Assets/Textures/Emoji.jpg");
 
 	m_vertexData = {
-		// Position             // Normals           // Texture Coords
-		 0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,     0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,    1.0f, 0.0f, 0.0f,     1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,     1.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,    1.0f, 0.0f, 0.0f,     1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,    1.0f, 0.0f, 0.0f,     0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,     0.0f, 1.0f
+		// Position           // Diffuse        // Texture Coords
+		 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 1.0f,  // top-right (red)
+		 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.0f, 1.0f,  // top-left (white)
+		 0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 0.0f,  // bottom-left (blue)
+		 0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 0.0f,  // bottom-left (blue)
+		 0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 0.0f,    1.0f, 0.0f,  // bottom-right (green)
+		 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 1.0f   // top-right (red)
 	};
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
@@ -93,11 +93,13 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetVec3("AmbientLight", { 0.1f, 0.1f, 0.1f });
 	m_shader->SetVec3("DiffuseColor", { 1.0f, 1.0f, 1.0f });
 	m_shader->SetFloat("SpecularStrength", 4);
-	m_shader->SetVec3("SpecularColor", { 3.0f, 0.0f, 0.0f });
+	m_shader->SetVec3("SpecularColor", { 1.0f, 1.0f, 1.0f });
 	m_shader->SetVec3("LightPosition", m_lightPosition);
 	m_shader->SetVec3("LightColor", m_lightColor);
 	m_shader->SetMat4("WVP", _pv * m_world);
 	m_shader->SetVec3("CameraPosition", m_cameraPosition);
+
+	//m_shader->SetVec3("yuv_sliders", m_yuvParams);
 }
 
 void Mesh::BindAttributes() {

@@ -32,8 +32,8 @@ void GameController::Initialize() {
 void GameController::RunGame() {
 	
 	// Show the C++/CLI tool window
-	//OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
-	//window->Show();
+	OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
+	window->Show();
 
 	// Create and compile our GLSL program from the shaders
 	m_shaderColor = Shader();
@@ -49,14 +49,27 @@ void GameController::RunGame() {
 
 	m_meshBox = Mesh();
 	m_meshBox.Create(&m_shaderDiffuse);
-	m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
+	m_meshBox.SetLightColor({ 0.5f, 0.5f, 0.5f });
 	m_meshBox.SetLightPosition(m_meshLight.GetPosition());
 	m_meshBox.SetCameraPosition(m_camera.GetPosition());
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
 	{
+		System::Windows::Forms::Application::DoEvents(); // Handle C++ / CLI form events
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
+
+		int y = (int)OpenGL::ToolWindow::RenderYChannel;
+		int u = (int)OpenGL::ToolWindow::RenderUChannel;
+		int v = (int)OpenGL::ToolWindow::RenderVChannel;
+
+		glm::vec3 yuvOffset = { 0, 0, 0 };
+
+		yuvOffset.x = (float)((y - 100.0f) / 100.0f);
+		yuvOffset.y = (float)((u - 100.0f) / 100.0f);
+		yuvOffset.z = (float)((v - 100.0f) / 100.0f);
+
+		//m_meshLight.SetYUVParams(yuvOffset);
 
 		m_meshBox.Render(m_camera.GetProjection() * m_camera.GetView());
 		m_meshLight.Render(m_camera.GetProjection() * m_camera.GetView());

@@ -21,6 +21,9 @@ public:
 	void SetLightColor(glm::vec3 _lightcolor) { m_lightColor = _lightcolor; }
 	void SetCameraPosition(glm::vec3 _cameraPosition) { m_cameraPosition = _cameraPosition; }
 
+	void SetYUVParams(glm::vec3 _yuvParams) { m_yuvParams = _yuvParams; }
+	glm::vec3 GetYUVParams() { return m_yuvParams; }
+
 	// Methods
 	void Create(Shader* _shader);
 	void Cleanup();
@@ -53,6 +56,8 @@ private:
 	glm::vec3 m_lightColor;
 	glm::vec3 m_cameraPosition;
 	//glm::mat4 m_world;
+
+	glm::vec3 m_yuvParams;
 };
 
 #endif // MESH_H
