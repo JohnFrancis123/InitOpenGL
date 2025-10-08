@@ -39,13 +39,14 @@ void Mesh::Create(Shader* _shader) {
 	m_texture2.LoadTexture("../Assets/Textures/Emoji.jpg");
 
 	m_vertexData = {
-		// Position           // Diffuse        // Texture Coords
-		 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 1.0f,  // top-right (red)
-		 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 1.0f,    0.0f, 1.0f,  // top-left (white)
-		 0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 0.0f,  // bottom-left (blue)
-		 0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,    0.0f, 0.0f,  // bottom-left (blue)
-		 0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 0.0f,    1.0f, 0.0f,  // bottom-right (green)
-		 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,    1.0f, 1.0f   // top-right (red)
+		// Pos                  // Color (Rainbow)   // Normals (NEW)     // Texture Coords
+		 0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f,    1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,    1.0f, 1.0f, 1.0f,    1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,    1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,    1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,    1.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f,    1.0f, 1.0f
+		 // Total Stride: 11 floats
 	};
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
@@ -75,9 +76,10 @@ void Mesh::Render(glm::mat4 _wvp) {
 	//glBindTexture(GL_TEXTURE_2D, m_texture.GetTexture());
 	//glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture()); //
 
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
+	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 11); // Draw the triangle
 	glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
 	glDisableVertexAttribArray(m_shader->GetAttrNormals());
+	glDisableVertexAttribArray(m_shader->GetAttrColors());
 	glDisableVertexAttribArray(m_shader->GetAttrVertices());
 	glDisableVertexAttribArray(m_shader->GetAttrTexCoords());
 }
@@ -99,42 +101,38 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetMat4("WVP", _pv * m_world);
 	m_shader->SetVec3("CameraPosition", m_cameraPosition);
 
-	//m_shader->SetVec3("yuv_sliders", m_yuvParams);
+	m_shader->SetVec3("yuv_sliders", m_yuvParams);
 }
 
 void Mesh::BindAttributes() {
 
-	// 1st attribute buffer : vertices
+	// 1st attribute buffer : vertices (3 floats)
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
-	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
-		3, //size (3 vertices per primitive)
-		GL_FLOAT, // type
-		GL_FALSE, // normalized?
-		8 * sizeof(float), // stride (8 floats per vertex definition)
-		(void*)0); // array buffer offset
+	glVertexAttribPointer(m_shader->GetAttrVertices(),
+		3, GL_FLOAT, GL_FALSE,
+		11 * sizeof(float), // New Stride
+		(void*)0);          // Offset: 0
 
-	// 2nd attribute buffer : normals
+	// NEW: 2nd attribute buffer : colors (3 floats)
+	glEnableVertexAttribArray(m_shader->GetAttrColors()); // Assuming you get this attribute
+	glVertexAttribPointer(m_shader->GetAttrColors(),
+		3, GL_FLOAT, GL_FALSE,
+		11 * sizeof(float), // New Stride
+		(void*)(3 * sizeof(float))); // Offset: after 3 position floats
+
+	// 3rd attribute buffer : normals (3 floats)
 	glEnableVertexAttribArray(m_shader->GetAttrNormals());
 	glVertexAttribPointer(m_shader->GetAttrNormals(),
-		3, // size
-		GL_FLOAT, // type
-		GL_FALSE, // normalized?
-		8 * sizeof(float), // stride (8 floats per vertex definition)
-		(void*)(3 * sizeof(float))); // array buffer offset
+		3, GL_FLOAT, GL_FALSE,
+		11 * sizeof(float), // New Stride
+		(void*)(6 * sizeof(float))); // Offset: after 3 pos + 3 color floats
 
-	// 3rd attirbute buffer : texCoords
+	// 4th attribute buffer : texCoords (2 floats)
 	glEnableVertexAttribArray(m_shader->GetAttrTexCoords());
-	glVertexAttribPointer(m_shader->GetAttrTexCoords(), // The attribute we want to configure
-		2, //size (3 vertices per primitive). SHOULD PROBABLY SET TO 3.
-		GL_FLOAT, //type
-		GL_FALSE, //normalized?
-		8 * sizeof(float), //stride (8 floats per vertex definition)
-		(void*)(6 * sizeof(float))); // array buffer offset
-
-	////4th attribute: WVP
-	//m_rotation.y += 0.001f;
-	//glm::mat4 transform = glm::rotate(_wvp, m_rotation.y, glm::vec3(0, 1, 0));
-	//glUniformMatrix4fv(m_shader->GetAttrWVP(), 1, GL_FALSE, &transform[0][0]);
+	glVertexAttribPointer(m_shader->GetAttrTexCoords(),
+		2, GL_FLOAT, GL_FALSE,
+		11 * sizeof(float), // New Stride
+		(void*)(9 * sizeof(float))); // Offset: after 3 pos + 3 color + 3 normal floats
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // Bind the vertex buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer); // Bind the index buffer

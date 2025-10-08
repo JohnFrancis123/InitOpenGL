@@ -1,6 +1,7 @@
 #version 330
 
 in vec3 vertices;
+in vec3 colors;      // <--- NEW: Accept the color attribute
 in vec3 normals;
 in vec2 texCoords;
 
@@ -12,6 +13,7 @@ out vec3 retNormal;
 out vec2 retTexCoord;
 out vec3 retFragPos;
 out vec3 retViewDirection;
+out vec3 retColor;   // <--- NEW: Output the interpolated color
 
 void main()
 {
@@ -20,4 +22,5 @@ void main()
 	retTexCoord = texCoords;
 	retFragPos = vec3(World * vec4(vertices, 1.0f));
 	retViewDirection = normalize(CameraPosition - retFragPos);
+    retColor = colors; // <--- NEW: Pass the vertex color
 }

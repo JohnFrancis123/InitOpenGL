@@ -69,7 +69,7 @@ void GameController::RunGame() {
 		yuvOffset.y = (float)((u - 100.0f) / 100.0f);
 		yuvOffset.z = (float)((v - 100.0f) / 100.0f);
 
-		//m_meshLight.SetYUVParams(yuvOffset);
+		m_meshLight.SetYUVParams(yuvOffset);
 
 		m_meshBox.Render(m_camera.GetProjection() * m_camera.GetView());
 		m_meshLight.Render(m_camera.GetProjection() * m_camera.GetView());
