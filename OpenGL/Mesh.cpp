@@ -57,9 +57,11 @@ void Mesh::Create(Shader* _shader) {
 	//m_world = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 0.0f));
 }
 
-void Mesh::Render(glm::mat4 _wvp) {
-	glUseProgram(m_shader->GetProgramID()); // Use our shader
+void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv) {
 
+	glUseProgram(m_shader->GetProgramID()); // Use our shader
+	
+	glUniform3f(m_shader->GetUniYUV(), _yuv.x, _yuv.y, _yuv.z);
 
 
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
@@ -112,4 +114,26 @@ void Mesh::Render(glm::mat4 _wvp) {
 	glDisableVertexAttribArray(m_shader->GetAttrColors());
 	glDisableVertexAttribArray(m_shader->GetAttrVertices());
 	glDisableVertexAttribArray(m_shader->GetAttrTexCoord());
+}
+
+glm::vec3 Mesh::ToYuv(glm::vec3 _rgb) {
+	glm::vec3 yuv = { 0.0f, 0.0f ,0.0f };
+	glm::mat3 yuvMat = { 
+		{0.299f, 0.587f, 0.114f},
+		{-0.14713f, -0.28886f, 0.436f},
+		{0.615f, -0.514999f, -0.10001f} 
+	};
+	yuv = _rgb * yuvMat;
+	return yuv;
+}
+
+glm::vec3 Mesh::ToRgb(glm::vec3 _yuv) {
+	glm::vec3 rgb = { 0.0f, 0.0f ,0.0f };
+	glm::mat3 rgbMat = { 
+		{1.0f, 0.0f, 1.13983f},
+		{1.0f, -0.39465f ,-5.8060f},
+		{1.0f, 2.03211f, 0.0f}
+	};
+	rgb = _yuv * rgbMat;
+	return rgb;
 }

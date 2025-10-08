@@ -14,6 +14,9 @@ public:
 	GLuint GetProgramID() { return m_programID; }
 	GLuint GetAttrVertices() { return m_attrVertices; }
 	GLuint GetAttrColors() { return m_attrColors; }
+
+	GLuint GetUniYUV() { return m_yuv; }
+	
 	GLuint GetAttrTexCoord() { return m_attrTexCoords; }
 	GLuint GetSampler1() { return m_sampler1; }
 	GLuint GetSampler2() { return m_sampler2; }
@@ -38,6 +41,10 @@ private:
 	GLuint m_attrWVP;
 	GLuint m_sampler1;
 	GLuint m_sampler2;
+
+	//Midterm
+	GLuint m_yuv;
+
 	GLint m_result = GL_FALSE;
 	int m_infoLogLength;
 };

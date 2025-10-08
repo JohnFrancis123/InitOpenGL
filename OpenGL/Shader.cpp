@@ -10,6 +10,8 @@ Shader::Shader() {
 	m_attrVertices = 0;
 	m_result = GL_FALSE;
 	m_infoLogLength = 0;
+
+	m_yuv = 0;
 }
 
 void Shader::Cleanup() {
@@ -23,6 +25,8 @@ void Shader::LoadAttributes() {
 	m_attrWVP = glGetUniformLocation(m_programID, "WVP"); // Get a handle for the WVP matrix
 	m_sampler1 = glGetUniformLocation(m_programID, "sampler1"); // Get a handle for texture sampler 1
 	m_sampler2 = glGetUniformLocation(m_programID, "sampler2"); // Get a handle for texture sampler 2
+
+	m_yuv = glGetUniformLocation(m_programID, "yuv_sliders");
 }
 
 void Shader::EvaluateShader(int _infoLength, GLuint _id) {

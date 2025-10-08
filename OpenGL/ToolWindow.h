@@ -25,6 +25,8 @@ namespace OpenGL {
 	private: System::Windows::Forms::TrackBar^ UTrackBar;
 	private: System::Windows::Forms::TrackBar^ VTrackBar;
 	private: System::Windows::Forms::TrackBar^ YTrackBar;
+	
+	public:
 		ToolWindow(void)
 		{
 			InitializeComponent();

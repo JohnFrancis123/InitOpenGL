@@ -34,8 +34,8 @@ void GameController::Initialize() {
 void GameController::RunGame() {
 	
 	// Show the C++/CLI tool window
-	//OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
-	//window->Show();
+	OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
+	window->Show();
 
 	// Create and compile our GLSL program from the shaders
 	m_shader = Shader();
@@ -47,9 +47,22 @@ void GameController::RunGame() {
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
 	{
+		System::Windows::Forms::Application::DoEvents(); // Handle C++ / CLI form events
+		
+
+		int y = (int)OpenGL::ToolWindow::RenderYChannel;
+		int u = (int)OpenGL::ToolWindow::RenderUChannel;
+		int v = (int)OpenGL::ToolWindow::RenderVChannel;
+
+		glm::vec3 yuvOffset = { 0, 0, 0 };
+
+		yuvOffset.x = (float)((y - 100.0f) / 100.0f);
+		yuvOffset.y = (float)((u - 100.0f) / 100.0f);
+		yuvOffset.z = (float)((v - 100.0f) / 100.0f);
+
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
 
-		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), yuvOffset);
 
 
 
