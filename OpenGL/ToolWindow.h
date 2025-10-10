@@ -22,20 +22,23 @@ namespace OpenGL {
 		static int RenderYChannel;
 		static int RenderUChannel;
 		static int RenderVChannel;
+
+		static int InvertColorsChannel;
+
 	private: System::Windows::Forms::TrackBar^ UTrackBar;
 	private: System::Windows::Forms::TrackBar^ VTrackBar;
 	private: System::Windows::Forms::Label^ label1;
 	private: System::Windows::Forms::Label^ label2;
 	private: System::Windows::Forms::Label^ label3;
+	private: System::Windows::Forms::CheckBox^ Invert;
 	private: System::Windows::Forms::TrackBar^ YTrackBar;
 	
 	public:
 		ToolWindow(void)
 		{
 			InitializeComponent();
-			RenderRedChannel = checkBoxRedChannel->Checked;
-			RenderGreenChannel = checkBoxGreenChannel->Checked;
-			RenderBlueChannel = checkBoxBlueChannel->Checked;
+
+			InvertColorsChannel = Invert->Checked;
 
 			RenderYChannel = YTrackBar->Value;
 			RenderUChannel = UTrackBar->Value;
@@ -60,9 +63,9 @@ namespace OpenGL {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::CheckBox^ checkBoxRedChannel;
-	private: System::Windows::Forms::CheckBox^ checkBoxGreenChannel;
-	private: System::Windows::Forms::CheckBox^ checkBoxBlueChannel;
+
+
+
 
 	protected:
 
@@ -85,80 +88,45 @@ namespace OpenGL {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->checkBoxRedChannel = (gcnew System::Windows::Forms::CheckBox());
-			this->checkBoxGreenChannel = (gcnew System::Windows::Forms::CheckBox());
-			this->checkBoxBlueChannel = (gcnew System::Windows::Forms::CheckBox());
 			this->YTrackBar = (gcnew System::Windows::Forms::TrackBar());
 			this->UTrackBar = (gcnew System::Windows::Forms::TrackBar());
 			this->VTrackBar = (gcnew System::Windows::Forms::TrackBar());
 			this->label1 = (gcnew System::Windows::Forms::Label());
 			this->label2 = (gcnew System::Windows::Forms::Label());
 			this->label3 = (gcnew System::Windows::Forms::Label());
+			this->Invert = (gcnew System::Windows::Forms::CheckBox());
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->YTrackBar))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->UTrackBar))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->VTrackBar))->BeginInit();
 			this->SuspendLayout();
 			// 
-			// checkBoxRedChannel
-			// 
-			this->checkBoxRedChannel->AutoSize = true;
-			this->checkBoxRedChannel->Location = System::Drawing::Point(13, 13);
-			this->checkBoxRedChannel->Name = L"checkBoxRedChannel";
-			this->checkBoxRedChannel->Size = System::Drawing::Size(107, 20);
-			this->checkBoxRedChannel->TabIndex = 0;
-			this->checkBoxRedChannel->Text = L"Red Channel";
-			this->checkBoxRedChannel->UseVisualStyleBackColor = true;
-			this->checkBoxRedChannel->CheckedChanged += gcnew System::EventHandler(this, &ToolWindow::checkBox1_CheckedChanged);
-			// 
-			// checkBoxGreenChannel
-			// 
-			this->checkBoxGreenChannel->AutoSize = true;
-			this->checkBoxGreenChannel->Location = System::Drawing::Point(13, 40);
-			this->checkBoxGreenChannel->Name = L"checkBoxGreenChannel";
-			this->checkBoxGreenChannel->Size = System::Drawing::Size(118, 20);
-			this->checkBoxGreenChannel->TabIndex = 1;
-			this->checkBoxGreenChannel->Text = L"Green Channel";
-			this->checkBoxGreenChannel->UseVisualStyleBackColor = true;
-			this->checkBoxGreenChannel->CheckedChanged += gcnew System::EventHandler(this, &ToolWindow::checkBoxGreenChannel_CheckedChanged);
-			// 
-			// checkBoxBlueChannel
-			// 
-			this->checkBoxBlueChannel->AutoSize = true;
-			this->checkBoxBlueChannel->Location = System::Drawing::Point(13, 67);
-			this->checkBoxBlueChannel->Name = L"checkBoxBlueChannel";
-			this->checkBoxBlueChannel->Size = System::Drawing::Size(108, 20);
-			this->checkBoxBlueChannel->TabIndex = 2;
-			this->checkBoxBlueChannel->Text = L"Blue Channel";
-			this->checkBoxBlueChannel->UseVisualStyleBackColor = true;
-			this->checkBoxBlueChannel->CheckedChanged += gcnew System::EventHandler(this, &ToolWindow::checkBoxBlueChannel_CheckedChanged);
-			// 
 			// YTrackBar
 			// 
 			this->YTrackBar->AccessibleName = L"";
-			this->YTrackBar->Location = System::Drawing::Point(27, 93);
+			this->YTrackBar->Location = System::Drawing::Point(12, 12);
 			this->YTrackBar->Maximum = 200;
 			this->YTrackBar->Name = L"YTrackBar";
-			this->YTrackBar->Size = System::Drawing::Size(263, 56);
+			this->YTrackBar->Size = System::Drawing::Size(798, 56);
 			this->YTrackBar->TabIndex = 3;
 			this->YTrackBar->Value = 100;
 			this->YTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::yTrackBar_Scroll);
 			// 
 			// UTrackBar
 			// 
-			this->UTrackBar->Location = System::Drawing::Point(27, 155);
+			this->UTrackBar->Location = System::Drawing::Point(12, 74);
 			this->UTrackBar->Maximum = 200;
 			this->UTrackBar->Name = L"UTrackBar";
-			this->UTrackBar->Size = System::Drawing::Size(263, 56);
+			this->UTrackBar->Size = System::Drawing::Size(798, 56);
 			this->UTrackBar->TabIndex = 4;
 			this->UTrackBar->Value = 100;
 			this->UTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::uTrackBar_Scroll);
 			// 
 			// VTrackBar
 			// 
-			this->VTrackBar->Location = System::Drawing::Point(27, 218);
+			this->VTrackBar->Location = System::Drawing::Point(12, 137);
 			this->VTrackBar->Maximum = 200;
 			this->VTrackBar->Name = L"VTrackBar";
-			this->VTrackBar->Size = System::Drawing::Size(263, 56);
+			this->VTrackBar->Size = System::Drawing::Size(798, 56);
 			this->VTrackBar->TabIndex = 5;
 			this->VTrackBar->Value = 100;
 			this->VTrackBar->Scroll += gcnew System::EventHandler(this, &ToolWindow::vTrackBar_Scroll);
@@ -166,7 +134,7 @@ namespace OpenGL {
 			// label1
 			// 
 			this->label1->AutoSize = true;
-			this->label1->Location = System::Drawing::Point(27, 132);
+			this->label1->Location = System::Drawing::Point(12, 51);
 			this->label1->Name = L"label1";
 			this->label1->Size = System::Drawing::Size(44, 16);
 			this->label1->TabIndex = 6;
@@ -176,7 +144,7 @@ namespace OpenGL {
 			// label2
 			// 
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(30, 196);
+			this->label2->Location = System::Drawing::Point(15, 115);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(44, 16);
 			this->label2->TabIndex = 7;
@@ -185,29 +153,38 @@ namespace OpenGL {
 			// label3
 			// 
 			this->label3->AutoSize = true;
-			this->label3->Location = System::Drawing::Point(33, 257);
+			this->label3->Location = System::Drawing::Point(18, 176);
 			this->label3->Name = L"label3";
 			this->label3->Size = System::Drawing::Size(44, 16);
 			this->label3->TabIndex = 8;
 			this->label3->Text = L"label3";
 			// 
+			// Invert
+			// 
+			this->Invert->AutoSize = true;
+			this->Invert->Location = System::Drawing::Point(12, 196);
+			this->Invert->Name = L"Invert";
+			this->Invert->Size = System::Drawing::Size(103, 20);
+			this->Invert->TabIndex = 9;
+			this->Invert->Text = L"Invert Colors";
+			this->Invert->UseVisualStyleBackColor = true;
+			this->Invert->CheckedChanged += gcnew System::EventHandler(this, &ToolWindow::Invert_CheckedChanged);
+			// 
 			// ToolWindow
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(8, 16);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
-			this->ClientSize = System::Drawing::Size(306, 372);
+			this->ClientSize = System::Drawing::Size(836, 372);
+			this->Controls->Add(this->Invert);
 			this->Controls->Add(this->label3);
 			this->Controls->Add(this->label2);
 			this->Controls->Add(this->label1);
 			this->Controls->Add(this->VTrackBar);
 			this->Controls->Add(this->UTrackBar);
 			this->Controls->Add(this->YTrackBar);
-			this->Controls->Add(this->checkBoxBlueChannel);
-			this->Controls->Add(this->checkBoxGreenChannel);
-			this->Controls->Add(this->checkBoxRedChannel);
 			this->FormBorderStyle = System::Windows::Forms::FormBorderStyle::FixedToolWindow;
 			this->Name = L"ToolWindow";
-			this->Text = L"ToolWindow";
+			this->Text = L"Tool Box";
 			this->TopMost = true;
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->YTrackBar))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->UTrackBar))->EndInit();
@@ -217,15 +194,6 @@ namespace OpenGL {
 
 		}
 #pragma endregion
-	private: System::Void checkBox1_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		RenderRedChannel = checkBoxRedChannel->Checked;
-	}
-	private: System::Void checkBoxGreenChannel_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		RenderGreenChannel = checkBoxGreenChannel->Checked;
-	}
-	private: System::Void checkBoxBlueChannel_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
-		RenderBlueChannel = checkBoxBlueChannel->Checked;
-	}
 
 	private: System::Void yTrackBar_Scroll(System::Object^ sender, System::EventArgs^ e) {
 		RenderYChannel = YTrackBar->Value;
@@ -247,5 +215,8 @@ private: System::Void label1_Click(System::Object^ sender, System::EventArgs^ e)
 
 }
 
+private: System::Void Invert_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
+	InvertColorsChannel = Invert->Checked;
+}
 };
 }

@@ -15,7 +15,8 @@ public:
 	GLuint GetAttrVertices() { return m_attrVertices; }
 	GLuint GetAttrColors() { return m_attrColors; }
 
-	GLuint GetUniYUV() { return m_yuv; }
+	GLuint GetYUV() { return m_yuv; }
+	GLuint GetInverted() { return m_inverted; }
 	
 	GLuint GetAttrTexCoord() { return m_attrTexCoords; }
 	GLuint GetSampler1() { return m_sampler1; }
@@ -44,6 +45,7 @@ private:
 
 	//Midterm
 	GLuint m_yuv;
+	GLuint m_inverted;
 
 	GLint m_result = GL_FALSE;
 	int m_infoLogLength;

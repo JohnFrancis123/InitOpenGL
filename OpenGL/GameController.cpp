@@ -49,6 +49,7 @@ void GameController::RunGame() {
 	{
 		System::Windows::Forms::Application::DoEvents(); // Handle C++ / CLI form events
 		
+		bool inverted = (bool)(int)OpenGL::ToolWindow::InvertColorsChannel;
 
 		int y = (int)OpenGL::ToolWindow::RenderYChannel;
 		int u = (int)OpenGL::ToolWindow::RenderUChannel;
@@ -62,7 +63,7 @@ void GameController::RunGame() {
 
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
 
-		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), yuvOffset);
+		m_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), yuvOffset, inverted);
 
 
 

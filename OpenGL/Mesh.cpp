@@ -65,11 +65,12 @@ void Mesh::Create(Shader* _shader) {
 	//m_world = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 0.0f));
 }
 
-void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv) {
+void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv, bool inverted) {
 
 	glUseProgram(m_shader->GetProgramID()); // Use our shader
 	
-	glUniform3f(m_shader->GetUniYUV(), _yuv.x, _yuv.y, _yuv.z);
+	glUniform3f(m_shader->GetYUV(), _yuv.x, _yuv.y, _yuv.z);
+	glUniform1i(m_shader->GetInverted(), inverted);
 
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
 	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure

@@ -26,7 +26,8 @@ void Shader::LoadAttributes() {
 	m_sampler1 = glGetUniformLocation(m_programID, "sampler1"); // Get a handle for texture sampler 1
 	m_sampler2 = glGetUniformLocation(m_programID, "sampler2"); // Get a handle for texture sampler 2
 
-	m_yuv = glGetUniformLocation(m_programID, "yuv_sliders");
+	m_yuv = glGetUniformLocation(m_programID, "yuvSliders");
+	m_inverted = glGetUniformLocation(m_programID, "inverted");
 }
 
 void Shader::EvaluateShader(int _infoLength, GLuint _id) {

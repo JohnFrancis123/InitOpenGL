@@ -8,36 +8,8 @@ out vec4 FragColor;
 uniform sampler2D sampler1;
 uniform sampler2D sampler2;
 
-uniform vec3 yuv_sliders; 
-uniform bool invert;
-
-vec3 RgbToYuv(vec3 rgb) {
-	const mat3 RGB_TO_YUV_MAT = mat3(
-		0.299, 0.587, 0.114,
-		-0.14713, -0.28886, 0.436,
-		0.615, -0.51499, -0.10001
-	);
-    
-	vec3 yuv_components = RGB_TO_YUV_MAT * rgb;
-    
-	yuv_components.y += 0.5;
-	yuv_components.z += 0.5;
-	return yuv_components;
-}
-
-vec3 YuvToRgb(vec3 yuv) {
-	const mat3 YUV_TO_RGB_MAT = mat3(
-		1.0, 0.0, 1.13983,
-		1.0, -0.39465, -0.58060,
-		1.0, 2.03211, 0.0
-	);
-    
-	vec3 yuv_centered = yuv;
-	yuv_centered.y -= 0.5;
- 	yuv_centered.z -= 0.5;
-
-	return YUV_TO_RGB_MAT * yuv_centered;
-}
+uniform vec3 yuvSliders; 
+uniform bool inverted;
 
 void main()
 {
@@ -58,9 +30,9 @@ void main()
 	float V = 0.615 * rgb.r - 0.51499 * rgb.g - 0.10001 * rgb.b;
 
 	//multiplying our values byt he slider values
-	Y *= yuv_sliders.r;
- 	U *= yuv_sliders.g;
- 	V *= yuv_sliders.b;
+	Y *= yuvSliders.r;
+ 	U *= yuvSliders.g;
+ 	V *= yuvSliders.b;
 
 	//converting back to rgb
  	float r = Y + 1.13983 * V;
@@ -69,10 +41,10 @@ void main()
 
  	vec3 newRGB = clamp(vec3(r, g, b), 0.0, 1.0);
 
-	//if (invert)
-	//{
-	//    newRGB = vec3(1.0) - newRGB;
-	//}
+	if (inverted)
+	{
+	    newRGB = vec3(1.0) - newRGB;
+	}
 
     //newRGB *= retColor;
     FragColor = vec4(newRGB, 1.0);
