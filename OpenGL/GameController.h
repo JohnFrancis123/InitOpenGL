@@ -18,11 +18,8 @@ public:
 	void Initialize();
 	void RunGame();
 private:
-	int m_effect;
-
 	Shader m_shader;
 	Camera m_camera;
-	Camera2 m_camera2;
 	Mesh m_mesh;
 };
 

@@ -9,13 +9,10 @@ Mesh::Mesh() {
 	m_indexBuffer = 0;
 	m_position = { 0, 0, 0 };
 	m_rotation = { 0, 0, 0 };
-	//m_world = glm::mat4(1.0f);
 }
 
 Mesh::~Mesh() {
 }
-
-
 
 void Mesh::Cleanup() {
 	glDeleteBuffers(1, &m_indexBuffer);
@@ -32,9 +29,6 @@ void Mesh::Create(Shader* _shader) {
 	m_texture2 = Texture();
 	m_texture2.LoadTexture("../Assets/Textures/Emoji.jpg");
 
-	//m_vertexData = { -1.0f, -1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f }; //this means 3 vertices, with 3 coordinates (x,y,z) each
-	float a = 26.0f;
-	float b = 42.0f;
 	m_vertexData = {
 		/*    Position   */  /*  RGB Color  */   /* Texture coords */
 		50.0f, 50.0f, 0.0f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
@@ -42,14 +36,6 @@ void Mesh::Create(Shader* _shader) {
 		-50.0f, -50.0f, 0.0f, 0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // bottom-left
 		-50.0f, 50.0f, 0.0f,  1.0f, 1.0f, 1.0f,  0.0f, 1.0f   //top-left
 	};
-
-	//m_vertexData = {
-	//	/*    Position   */  /*  RGB Color  */   /* Texture coords */
-	//	50.0f, 50.0f, 0.0f,   0.5f, 0.0f, 0.0f,  1.0f, 1.0f,  // top-right
-	//	50.0f, -50.0f, 0.0f,  0.0f, 0.5f, 0.0f,  1.0f, 0.0f,  // bottom-right
-	//	-50.0f, -50.0f, 0.0f, 0.0f, 0.0f, 0.5f,  0.0f, 0.0f,  // bottom-left
-	//	-50.0f, 50.0f, 0.0f,  0.5f, 0.5f, 0.5f,  0.0f, 1.0f   //top-left
-	//};
 
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
@@ -61,16 +47,15 @@ void Mesh::Create(Shader* _shader) {
 	glGenBuffers(1, &m_indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indexData.size() * sizeof(GLubyte), m_indexData.data(), GL_STATIC_DRAW);
-	//NEW. MAY NEED TO DELETE.
-	//m_world = glm::translate(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 0.0f));
+
 }
 
 void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv, bool inverted) {
 
 	glUseProgram(m_shader->GetProgramID()); // Use our shader
 	
-	glUniform3f(m_shader->GetYUV(), _yuv.x, _yuv.y, _yuv.z);
-	glUniform1i(m_shader->GetInverted(), inverted);
+	glUniform3f(m_shader->GetYUV(), _yuv.x, _yuv.y, _yuv.z); //passing _yuv into the fragment shader
+	glUniform1i(m_shader->GetInverted(), inverted); //passing invert to the fragment shader
 
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
 	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
@@ -99,7 +84,6 @@ void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv, bool inverted) {
 		(void*)(6 * sizeof(float))); // array buffer offset
 
 	//4th attribute: WVP
-	//m_rotation.y += 0.001f;
 	glm::mat4 transform = glm::rotate(_wvp, m_rotation.y, glm::vec3(0, 1, 0));
 	glUniformMatrix4fv(m_shader->GetAttrWVP(), 1, GL_FALSE, &transform[0][0]);
 
@@ -114,34 +98,9 @@ void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv, bool inverted) {
 	glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture());
 	glUniform1i(m_shader->GetSampler2(), 1);
 	
-	//glBindTexture(GL_TEXTURE_2D, m_texture.GetTexture());
-	//glBindTexture(GL_TEXTURE_2D, m_texture2.GetTexture()); //
-
-	//glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 7); // Draw the triangle
 	glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
 	glDisableVertexAttribArray(m_shader->GetAttrColors());
 	glDisableVertexAttribArray(m_shader->GetAttrVertices());
 	glDisableVertexAttribArray(m_shader->GetAttrTexCoord());
 }
 
-glm::vec3 Mesh::ToYuv(glm::vec3 _rgb) {
-	glm::vec3 yuv = { 0.0f, 0.0f ,0.0f };
-	glm::mat3 yuvMat = { 
-		{0.299f, 0.587f, 0.114f},
-		{-0.14713f, -0.28886f, 0.436f},
-		{0.615f, -0.514999f, -0.10001f} 
-	};
-	yuv = _rgb * yuvMat;
-	return yuv;
-}
-
-glm::vec3 Mesh::ToRgb(glm::vec3 _yuv) {
-	glm::vec3 rgb = { 0.0f, 0.0f ,0.0f };
-	glm::mat3 rgbMat = { 
-		{1.0f, 0.0f, 1.13983f},
-		{1.0f, -0.39465f ,-5.8060f},
-		{1.0f, 2.03211f, 0.0f}
-	};
-	rgb = _yuv * rgbMat;
-	return rgb;
-}

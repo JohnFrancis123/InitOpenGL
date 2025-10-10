@@ -19,9 +19,6 @@ public:
 
 	void Render(glm::mat4 _wvp, glm::vec3 _yuv, bool inverted);
 
-	glm::vec3 ToYuv(glm::vec3 _rgb);
-	glm::vec3 ToRgb(glm::vec3 _yuv);
-
 private:
 	Shader* m_shader; //the shader that will be used to render this mesh
 	Texture m_texture;

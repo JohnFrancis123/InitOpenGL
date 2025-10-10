@@ -1,6 +1,6 @@
 #version 330
 
-in vec3 retColor; 
+in vec3 retColor;
 in vec2 retTexCoord;
 
 out vec4 FragColor;
@@ -8,44 +8,62 @@ out vec4 FragColor;
 uniform sampler2D sampler1;
 uniform sampler2D sampler2;
 
-uniform vec3 yuvSliders; 
+uniform vec3 yuvSliders;
 uniform bool inverted;
+
+//making constant matrices to use for later
+const mat3 RGB_TO_YUV_MAT = mat3(
+    0.299, 0.587, 0.114,
+    -0.14713, -0.28886, 0.436,
+    0.615, -0.51499, -0.10001
+);
+
+const mat3 YUV_TO_RGB_MAT = mat3(
+    1.0, 0.0, 1.13983,
+    1.0, -0.39465, -0.58060,
+    1.0, 2.03211, 0.0
+);
+
+//helper functions (not really necessary, but they help visualize things)
+vec3 YuvToRgbMatrix(vec3 yuv) {
+    return yuv * YUV_TO_RGB_MAT;
+}
+
+vec3 RgbToYuvMatrix(vec3 rgb) {
+    return rgb * RGB_TO_YUV_MAT;
+}
 
 void main()
 {
- 	//nlending the textures
- 	vec4 tex1 = texture(sampler1, retTexCoord);
- 	vec4 tex2 = texture(sampler2, retTexCoord);
+	//blending the textures
 	vec4 baseColor = mix(texture(sampler1, retTexCoord), texture(sampler2, retTexCoord), 0.5);
 
-	//multiplying by our ret colors for rainbow effect
-	baseColor.r *= retColor.r;
-	baseColor.g *= retColor.g;
-	baseColor.b *= retColor.b;
+	//applying the rainbow color from retColor
+	vec3 rgb = baseColor.rgb * retColor; 
 
-	//converting rgb to yuv
-	vec3 rgb = baseColor.rgb;
- 	float Y = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
-	float U = -0.14713 * rgb.r - 0.28886 * rgb.g + 0.436 * rgb.b;
-	float V = 0.615 * rgb.r - 0.51499 * rgb.g - 0.10001 * rgb.b;
+	//converting RGB to YUV using the matrix function
+	vec3 yuvBase = RgbToYuvMatrix(rgb);
 
-	//multiplying our values byt he slider values
-	Y *= yuvSliders.r;
- 	U *= yuvSliders.g;
- 	V *= yuvSliders.b;
-
-	//converting back to rgb
- 	float r = Y + 1.13983 * V;
-	float g = Y - 0.39465 * U - 0.58060 * V;
-	float b = Y + 2.03211 * U;
-
- 	vec3 newRGB = clamp(vec3(r, g, b), 0.0, 1.0);
-
+	//YUV scaling (using a diagonal scale matrix)
+    	mat3 scaleMatrix = mat3(0.0); //creating a zero matrix
+    	scaleMatrix[0][0] = yuvSliders.r; //scaling Y
+    	scaleMatrix[1][1] = yuvSliders.g; //scaling U
+   	scaleMatrix[2][2] = yuvSliders.b; //scaling V
+	
+	//mutliplication using our scaled matrix will give the result to convert
+    	vec3 yuvAdjusted = scaleMatrix * yuvBase;
+    
+	//converting back to RGB using the matrix function
+	vec3 finalRGB = YuvToRgbMatrix(yuvAdjusted);
+	
+	//clamping so as not to get values outside of our desired range
+	vec3 newRGB = clamp(finalRGB, 0.0, 1.0);
+	
+	//inverting colors if checked
 	if (inverted)
 	{
-	    newRGB = vec3(1.0) - newRGB;
+	 	newRGB = vec3(1.0) - newRGB;
 	}
-
-    //newRGB *= retColor;
-    FragColor = vec4(newRGB, 1.0);
+	//setting the frag color to return, as per assignment instructions
+ 	FragColor = vec4(newRGB, baseColor.a);
 }
