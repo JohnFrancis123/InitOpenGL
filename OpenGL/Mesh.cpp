@@ -70,7 +70,7 @@ void Mesh::Render(glm::mat4 _wvp, glm::vec3 _yuv) {
 	glUseProgram(m_shader->GetProgramID()); // Use our shader
 	
 	glUniform3f(m_shader->GetUniYUV(), _yuv.x, _yuv.y, _yuv.z);
-
+	//
 
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
 	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
