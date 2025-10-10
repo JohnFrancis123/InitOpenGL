@@ -56,9 +56,9 @@ void GameController::RunGame() {
 
 		glm::vec3 yuvOffset = { 0, 0, 0 };
 
-		yuvOffset.x = (float)((y - 100.0f) / 100.0f);
-		yuvOffset.y = (float)((u - 100.0f) / 100.0f);
-		yuvOffset.z = (float)((v - 100.0f) / 100.0f);
+		yuvOffset.x = ((float)(y) / 100.0f);
+		yuvOffset.y = ((float)(u) / 100.0f);
+		yuvOffset.z = ((float)(v) / 100.0f);
 
 		glClear(GL_COLOR_BUFFER_BIT); // Clear the screen
 
