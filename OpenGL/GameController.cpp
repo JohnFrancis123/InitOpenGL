@@ -44,7 +44,7 @@ void GameController::RunGame() {
 	// Create meshes
 	m_meshLight = Mesh(); //re-initialize m_mesh to ensure it's a fresh object
 	m_meshLight.Create(&m_shaderColor); //creating the mesh, which sets up its vertex buffer and data
-	m_meshLight.SetPosition({ 1.0f, 0.5f, 0.5f });
+	m_meshLight.SetPosition({ 1.0f, -0.5f, 0.5f });
 	m_meshLight.SetScale({ 0.1f, 0.1f, 0.1f });
 
 	m_meshBox = Mesh();
