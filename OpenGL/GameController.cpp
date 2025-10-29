@@ -42,17 +42,23 @@ void GameController::RunGame() {
 	m_shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.Fragmentshader");
 
 	// Create meshes
-	m_meshLight = Mesh(); //re-initialize m_mesh to ensure it's a fresh object
-	m_meshLight.Create(&m_shaderColor); //creating the mesh, which sets up its vertex buffer and data
-	m_meshLight.SetPosition({ 0.5f, 0.0f, -0.5f });
-	m_meshLight.SetScale({ 0.1f, 0.1f, 0.1f });
+	for (int count = 0; count < 4; count++) 
+	{
+		Mesh m = Mesh();
+		//m_meshLight = Mesh(); //re-initialize m_mesh to ensure it's a fresh object
+		m.Create(&m_shaderColor); //creating the mesh, which sets up its vertex buffer and data
+		m.SetPosition({ 0.5f + (float)count / 10.0f, 0.0f, -0.5f});
+		m.SetColor({ glm::linearRand(0.0f, 1.0f), glm::linearRand(0.0f, 1.0f), glm::linearRand(0.0f, 1.0f) });
+		m.SetScale({ 0.1f, 0.1f, 0.1f });
+		Mesh::Lights.push_back(m);
+	}
 
 	for (int col = 0; col < 10; col++) {
 		for (int count = 0; count < 10; count++) {
 			Mesh box = Mesh();
 			box.Create(&m_shaderDiffuse);
-			box.SetLightColor({ 1.0f, 1.0f, 1.0f });
-			box.SetLightPosition(m_meshLight.GetPosition());
+			//box.SetLightColor({ 1.0f, 1.0f, 1.0f });
+			//box.SetLightPosition(m_meshLight.GetPosition());
 			box.SetCameraPosition(m_camera.GetPosition());
 			box.SetScale({ 0.1f, 0.1f, 0.1f });
 			box.SetPosition({ 0.0f, -0.5f + (float)count / 10.0f, -0.2f + (float)col / 10.0f });
@@ -75,7 +81,11 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
 			m_meshBoxes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
-		m_meshLight.Render(m_camera.GetProjection() * m_camera.GetView());
+
+		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
+			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
+		}
+		//m_meshLight.Render(m_camera.GetProjection() * m_camera.GetView());
 
 
 		//m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
@@ -89,7 +99,11 @@ void GameController::RunGame() {
 	while (glfwGetKey(win, GLFW_KEY_ESCAPE) != GLFW_PRESS && //Check if the ESC key is pressed
 		glfwWindowShouldClose(win) == 0); //Check if the window was closed
 
-	m_meshLight.Cleanup(); //cleaning up the mesh, which deletes its vertex buffer
+	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
+		Mesh::Lights[count].Cleanup();
+	}
+
+	//m_meshLight.Cleanup(); //cleaning up the mesh, which deletes its vertex buffer
 	for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
 		m_meshBoxes[count].Cleanup();
 	}
