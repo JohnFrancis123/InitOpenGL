@@ -35,7 +35,7 @@ struct Light
 uniform Material material;
 //uniform Light light;
 
-#define NR_LIGHTS 4
+#define NR_LIGHTS 1
 uniform Light light[NR_LIGHTS];
 
 void main()

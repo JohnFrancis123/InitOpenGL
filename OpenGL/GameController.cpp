@@ -42,30 +42,19 @@ void GameController::RunGame() {
 	m_shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.Fragmentshader");
 
 	// Create meshes
-	for (int count = 0; count < 4; count++) 
-	{
-		Mesh m = Mesh();
-		//m_meshLight = Mesh(); //re-initialize m_mesh to ensure it's a fresh object
-		m.Create(&m_shaderColor); //creating the mesh, which sets up its vertex buffer and data
-		m.SetPosition({ 0.5f + (float)count / 10.0f, 0.0f, -0.5f});
-		m.SetColor({ glm::linearRand(0.0f, 1.0f), glm::linearRand(0.0f, 1.0f), glm::linearRand(0.0f, 1.0f) });
-		m.SetScale({ 0.1f, 0.1f, 0.1f });
-		Mesh::Lights.push_back(m);
-	}
+	Mesh m = Mesh();
+	m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
+	m.SetPosition({ 1.0f, 0.0f, 0.0f });
+	m.SetColor({ 1.0f, 1.0f, 1.0f });
+	m.SetScale({ 0.01f, 0.01f, 0.01f });
+	Mesh::Lights.push_back(m);
 
-	for (int col = 0; col < 10; col++) {
-		for (int count = 0; count < 10; count++) {
-			Mesh box = Mesh();
-			box.Create(&m_shaderDiffuse);
-			//box.SetLightColor({ 1.0f, 1.0f, 1.0f });
-			//box.SetLightPosition(m_meshLight.GetPosition());
-			box.SetCameraPosition(m_camera.GetPosition());
-			box.SetScale({ 0.1f, 0.1f, 0.1f });
-			box.SetPosition({ 0.0f, -0.5f + (float)count / 10.0f, -0.2f + (float)col / 10.0f });
-			m_meshBoxes.push_back(box);
-		}
-	}
-
+	Mesh teapot = Mesh();
+	teapot.Create(&m_shaderDiffuse, "../Assets/Models/teapot.obj");
+	teapot.SetCameraPosition(m_camera.GetPosition());
+	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
+	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
+	m_meshBoxes.push_back(teapot);
 	//m_meshBox = Mesh();
 	//m_meshBox.Create(&m_shaderDiffuse);
 	//m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });

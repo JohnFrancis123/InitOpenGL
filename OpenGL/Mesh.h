@@ -24,7 +24,7 @@ public:
 	void SetCameraPosition(glm::vec3 _cameraPosition) { m_cameraPosition = _cameraPosition; }
 
 	// Methods
-	void Create(Shader* _shader);
+	void Create(Shader* _shader, string _file);
 	void Cleanup();
 	void CalculateTransform();
 	void Render();
@@ -42,6 +42,10 @@ private:
 	Shader* m_shader; //the shader that will be used to render this mesh
 	Texture m_specularTexture;
 	Texture m_diffuseTexture;
+
+	//Texture m_texture;
+	//Texture m_texture2;
+
 	GLuint m_vertexBuffer; //this is held on the VRAM
 	GLuint m_indexBuffer; // GPU buffer
 	std::vector<GLfloat> m_vertexData; // Store vertex data in RAM

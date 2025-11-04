@@ -30,54 +30,40 @@ void Mesh::Cleanup() {
 
 
 
-void Mesh::Create(Shader* _shader) {
+void Mesh::Create(Shader* _shader, string _file) {
 	m_shader = _shader;
+	
+	//namespace was originally OpenGL
+	objl::Loader Loader; // Initialize Loader
+	M_ASSERT(Loader.LoadFile(_file) == true, "Failed to load mesh."); // Load obj file
+
+	for (unsigned int i = 0; i < Loader.LoadedMeshes.size(); i++) {
+		objl::Mesh curMesh = Loader.LoadedMeshes[i];
+		for (unsigned int j = 0; j < curMesh.Vertices.size(); j++) 
+		{
+			m_vertexData.push_back(curMesh.Vertices[j].Position.X);
+			m_vertexData.push_back(curMesh.Vertices[j].Position.Y);
+			m_vertexData.push_back(curMesh.Vertices[j].Position.Z);
+			m_vertexData.push_back(curMesh.Vertices[j].Normal.X);
+			m_vertexData.push_back(curMesh.Vertices[j].Normal.Y);
+			m_vertexData.push_back(curMesh.Vertices[j].Normal.Z);
+			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.X);
+			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
+		}
+	}
+
+	// Remove directory if present.
+	string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
+	const size_t last_slash_idx = diffuseNap.find_last_of("\\");
+	if (std::string::npos != last_slash_idx) {
+		diffuseNap.erase(0, last_slash_idx + 1);
+	}
 
 	m_specularTexture = Texture();
-	m_specularTexture.LoadTexture("../Assets/Textures/MetalWoodFrameBlack.jpg"); //we're using WoodFrameBlack or WoodFrameEmpty
+	m_specularTexture.LoadTexture("../Assets/Textures/" + diffuseNap);
 	m_diffuseTexture = Texture();
-	m_diffuseTexture.LoadTexture("../Assets/Textures/Wood.jpg"); 
+	m_diffuseTexture.LoadTexture("../Assets/Textures/" + diffuseNap);
 
-	m_vertexData = {
-		/* Position */ /* Normals */ /* Texture Coords
-		*/
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-		0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
-	};
 
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
@@ -157,15 +143,7 @@ void Mesh::BindAttributes() {
 		(void*)(6 * sizeof(float))); // array buffer offset
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // Bind the vertex buffer
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer); // Bind the index buffer
 
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, m_specularTexture.GetTexture());
-	//glUniform1i(m_shader->GetSampler1(), 0);
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, m_diffuseTexture.GetTexture());
-	//glUniform1i(m_shader->GetSampler2(), 1);
 }
 
 void Mesh::Render(glm::mat4 _pv) {
