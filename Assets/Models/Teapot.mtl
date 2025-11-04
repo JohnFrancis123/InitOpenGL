@@ -12,5 +12,5 @@ newmtl 01___Default
 	Kd 0.5880 0.5880 0.5880
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ka C:\Users\johnF\Downloads\Week9Assets\Assets\Flowers.jpg
-	map_Kd C:\Users\johnF\Downloads\Week9Assets\Assets\Flowers.jpg
+	map_Ka C:\Users\johnF\source\repos\InitOpenGL\Assets\Textures\Flowers.jpg
+	map_Kd C:\Users\johnF\source\repos\InitOpenGL\Assets\Textures\Flowers.jpg

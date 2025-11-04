@@ -55,6 +55,7 @@ void GameController::RunGame() {
 	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
 	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
 	m_meshBoxes.push_back(teapot);
+	
 	//m_meshBox = Mesh();
 	//m_meshBox.Create(&m_shaderDiffuse);
 	//m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
@@ -65,8 +66,6 @@ void GameController::RunGame() {
 	do
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
-
-		//m_meshBox.Render(m_camera.GetProjection() * m_camera.GetView());
 		for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
 			m_meshBoxes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
@@ -74,10 +73,7 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
-		//m_meshLight.Render(m_camera.GetProjection() * m_camera.GetView());
 
-
-		//m_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input
 	} 
@@ -96,7 +92,6 @@ void GameController::RunGame() {
 	for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
 		m_meshBoxes[count].Cleanup();
 	}
-	//m_meshBox.Cleanup();
 	m_shaderDiffuse.Cleanup();
 	m_shaderColor.Cleanup(); //cleaning up the shader, which deletes its program
 }

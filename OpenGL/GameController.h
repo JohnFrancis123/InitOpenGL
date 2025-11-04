@@ -6,7 +6,7 @@
 #include "Mesh.h"
 #include "WindowController.h"
 #include "Camera.h"
-#include "Camera2.h"
+//#include "Camera2.h"
 
 class GameController : public Singleton<GameController>
 {
