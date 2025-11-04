@@ -39,7 +39,7 @@ void GameController::RunGame() {
 	m_shaderColor = Shader();
 	m_shaderColor.LoadShaders("Color.vertexshader", "Color.fragmentshader");
 	m_shaderDiffuse = Shader();
-	m_shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.Fragmentshader");
+	m_shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
 
 	// Create meshes
 	Mesh m = Mesh();

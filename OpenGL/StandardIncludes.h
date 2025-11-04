@@ -27,8 +27,11 @@
 #include "Resolution.h"
 #include "Singleton.h"
 
+//#ifndef OBJ_LOADER_H
+//#define OBJ_LOADER_H
+//#include <OBJ_Loader.h>
+//#endif //OBJ_LOADER_H
 
-#include <OBJ_Loader.h>
 
 using namespace std; 
 

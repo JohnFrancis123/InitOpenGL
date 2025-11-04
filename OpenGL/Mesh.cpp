@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "Shader.h" // Add this include to resolve incomplete type error
+#include "OBJ_Loader.h"
 
 vector<Mesh> Mesh::Lights;
 
