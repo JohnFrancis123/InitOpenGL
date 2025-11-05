@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "WindowController.h"
 #include "Camera.h"
+#include "Fonts.h"
 //#include "Camera2.h"
 
 class GameController : public Singleton<GameController>
@@ -20,6 +21,7 @@ public:
 private:
 	Shader m_shaderColor;
 	Shader m_shaderDiffuse;
+	Shader m_shaderFont;
 	Camera m_camera;
 	vector<Mesh> m_meshBoxes;
 	Mesh m_meshLight;

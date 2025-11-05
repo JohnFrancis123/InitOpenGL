@@ -24,6 +24,10 @@
 #include <glm/ext.hpp> // OpenGL Experimental to_string
 #include <glm/gtc/matrix_transform.hpp> // View / Projection
 
+// Font Includes
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include "Resolution.h"
 #include "Singleton.h"
 

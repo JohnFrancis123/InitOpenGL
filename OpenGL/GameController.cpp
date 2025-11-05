@@ -22,6 +22,8 @@ void GameController::Initialize() {
 
 	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	srand(time(0));
 	// Create a default perspective camera
 	m_camera = Camera(WindowController::GetInstance().GetResolution());
@@ -40,6 +42,9 @@ void GameController::RunGame() {
 	m_shaderColor.LoadShaders("Color.vertexshader", "Color.fragmentshader");
 	m_shaderDiffuse = Shader();
 	m_shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
+	m_shaderFont = Shader();
+	m_shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
+
 
 	// Create meshes
 	Mesh m = Mesh();
@@ -55,7 +60,9 @@ void GameController::RunGame() {
 	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
 	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
 	m_meshBoxes.push_back(teapot);
-	
+
+	Fonts f = Fonts();
+	f.Create(&m_shaderFont, "arial.ttf", 100);
 	//m_meshBox = Mesh();
 	//m_meshBox.Create(&m_shaderDiffuse);
 	//m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
@@ -73,6 +80,12 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
+		f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
+
+		f.RenderText("Testing Text", 10, 700, 0.5f, { 1.0f, 0.0f, 0.0f });
+
+		f.RenderText("Testing Text", 800, 700, 0.5f, { 1.0f, 1.0f, 1.0f });
+
 
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input
