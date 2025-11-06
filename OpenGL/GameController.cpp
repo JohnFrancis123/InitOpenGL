@@ -48,14 +48,16 @@ void GameController::RunGame() {
 
 	// Create meshes
 	Mesh m = Mesh();
-	m.Create(&m_shaderColor, "../Assets/Models/torus.obj");
+	//m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
+	m.Create(&m_shaderColor, "../Assets/Models/torus2.obj");
 	m.SetPosition({ 1.0f, 0.0f, 0.0f });
 	m.SetColor({ 1.0f, 1.0f, 1.0f });
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
 	Mesh teapot = Mesh();
-	teapot.Create(&m_shaderDiffuse, "../Assets/Models/torus.obj");
+	//teapot.Create(&m_shaderDiffuse, "../Assets/Models/teapot.obj");
+	teapot.Create(&m_shaderDiffuse, "../Assets/Models/torus2.obj");
 	teapot.SetCameraPosition(m_camera.GetPosition());
 	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
 	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
@@ -76,6 +78,9 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
 			m_meshBoxes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
+
+		if ((int)m_meshBoxes.size() == 1)
+			m_meshBoxes[0].Render(m_camera.GetProjection() * m_camera.GetView());
 
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
