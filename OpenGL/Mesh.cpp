@@ -96,7 +96,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 		m_shader->SetFloat(Concat("light[", i, "].linear").c_str(), 0.09f);
 		m_shader->SetFloat(Concat("light[", i, "].quadratic").c_str(), 0.032f);
 
-		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.1f, 0.1f, 0.1f });
+		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 1.0f, 1.0f, 1.0f });
 		m_shader->SetVec3(Concat("light[", i, "].diffuseColor").c_str(), Lights[i].GetColor());
 		m_shader->SetVec3(Concat("light[", i, "].specularColor").c_str(), { 3.0f, 3.0f, 3.0f });
 
