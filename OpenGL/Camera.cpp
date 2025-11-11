@@ -7,7 +7,7 @@ Camera::Camera() {
 }
 
 Camera::Camera(Resolution _screenResolution) {
-	m_position = { 0, 2, -3 };
+	m_position = { 0, 2, 3 };
 	// Projection Matrix : 45 deg FOV, 4:3 ratio, display range : 0.1 unit <-> 1000 units
 	m_projection = glm::perspective(glm::radians(45.0f), // 0.3 degree FOV to accomodate for the distance. Creating a zoom effect.
 									(float)_screenResolution.m_width /

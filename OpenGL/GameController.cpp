@@ -61,7 +61,7 @@ void GameController::RunGame() {
 	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
 	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
 	m_meshBoxes.push_back(teapot);
-	
+
 	Mesh box = Mesh();
 	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
 	box.SetCameraPosition(m_camera.GetPosition());
@@ -73,7 +73,7 @@ void GameController::RunGame() {
 	plane.Create(&m_shaderDiffuse, "../Assets/Models/Plane.obj");
 	plane.SetCameraPosition(m_camera.GetPosition());
 	plane.SetScale({ 0.3f, 0.3f, 0.3f });
-	plane.SetPosition({ 0.0f, 0.0f, 0.0f });
+	plane.SetPosition({ 0.0f, 0.0f, -1.0f });
 	m_meshBoxes.push_back(plane);
 #pragma endregion CreateMeshes
 
