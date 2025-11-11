@@ -36,7 +36,7 @@ void GameController::RunGame() {
 	// Show the C++/CLI tool window
 	//OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
 	//window->Show();
-
+#pragma region SetupShaders
 	// Create and compile our GLSL program from the shaders
 	m_shaderColor = Shader();
 	m_shaderColor.LoadShaders("Color.vertexshader", "Color.fragmentshader");
@@ -44,27 +44,34 @@ void GameController::RunGame() {
 	m_shaderDiffuse.LoadShaders("Diffuse.vertexshader", "Diffuse.fragmentshader");
 	m_shaderFont = Shader();
 	m_shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
+#pragma endregion SetupShaders
 
-
+#pragma region CreateMeshes
 	// Create meshes
 	Mesh m = Mesh();
-	//m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
-	m.Create(&m_shaderColor, "../Assets/Models/TorusKnot.obj");
+	m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
 	m.SetPosition({ 1.0f, 0.0f, 0.0f });
 	m.SetColor({ 1.0f, 1.0f, 1.0f });
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
 	Mesh teapot = Mesh();
-	//teapot.Create(&m_shaderDiffuse, "../Assets/Models/teapot.obj");
-	teapot.Create(&m_shaderDiffuse, "../Assets/Models/TorusKnot.obj");
+	teapot.Create(&m_shaderDiffuse, "../Assets/Models/teapot.obj");
 	teapot.SetCameraPosition(m_camera.GetPosition());
 	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
 	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
 	m_meshBoxes.push_back(teapot);
+	
+	Mesh box = Mesh();
+	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
+	box.SetCameraPosition(m_camera.GetPosition());
+	box.SetScale({ 0.5f, 0.5f, 0.5f });
+	box.SetPosition({ -1.0f, -1.0f, -1.0f });
+	m_meshBoxes.push_back(box);
+#pragma endregion CreateMeshes
 
-	Fonts f = Fonts();
-	f.Create(&m_shaderFont, "arial.ttf", 100);
+	//Fonts f = Fonts();
+	//f.Create(&m_shaderFont, "arial.ttf", 100);
 	//m_meshBox = Mesh();
 	//m_meshBox.Create(&m_shaderDiffuse);
 	//m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
@@ -82,11 +89,11 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
-		f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
+		//f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
 
-		f.RenderText("Testing Text", 10, 700, 0.5f, { 1.0f, 0.0f, 0.0f });
+		//f.RenderText("Testing Text", 10, 700, 0.5f, { 1.0f, 0.0f, 0.0f });
 
-		f.RenderText("Testing Text", 800, 700, 0.5f, { 1.0f, 1.0f, 1.0f });
+		//f.RenderText("Testing Text", 800, 700, 0.5f, { 1.0f, 1.0f, 1.0f });
 
 
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
