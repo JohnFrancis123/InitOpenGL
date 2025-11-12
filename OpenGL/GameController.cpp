@@ -110,7 +110,7 @@ void GameController::RunGame() {
 #pragma region Render
 	do
 	{
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen //
 		m_camera.Rotate();
 		glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
 		skybox.Render(m_camera.GetProjection() * view);
