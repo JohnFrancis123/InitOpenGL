@@ -150,7 +150,7 @@ void GameController::RunGame() {
 	}
 	skybox.Cleanup();
 	m_shaderDiffuse.Cleanup();
-	m_shaderColor.Cleanup(); //cleaning up the shader, which deletes its program
+	m_shaderColor.Cleanup(); //cleaning up the shader, which deletes its program //
 	m_shaderSkybox.Cleanup();
 }
 #pragma endregion Cleanup
