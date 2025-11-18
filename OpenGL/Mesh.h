@@ -53,6 +53,7 @@ private:
 	std::vector<GLfloat> m_vertexData; // Store vertex data in RAM
 	std::vector<GLubyte> m_indexData; // Store index data in RAM
 
+	bool m_enableNormalMap;
 	// Transform
 	glm::vec3 m_position;
 	glm::vec3 m_rotation;

@@ -55,7 +55,7 @@ void GameController::RunGame() {
 	// Create meshes
 	Mesh m = Mesh();
 	m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
-	m.SetPosition({ 1.0f, 0.0f, 0.0f });
+	m.SetPosition({ 1.5f, 0.0f, 1.0f });
 	m.SetColor({ 1.0f, 1.0f, 1.0f });
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
@@ -63,16 +63,17 @@ void GameController::RunGame() {
 	Mesh box = Mesh();
 	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
 	box.SetCameraPosition(m_camera.GetPosition());
-	box.SetScale({ 0.5f, 0.5f, 0.5f });
-	box.SetPosition({ 1.0f, 0.0f, 5.0f });
+	box.SetScale({ 0.25f, 0.25f, 0.25f });
+	box.SetPosition({ 0.0f, 1.0f, 1.0f });
 	m_meshes.push_back(box);
 
-	Mesh plane = Mesh();
-	plane.Create(&m_shaderDiffuse, "../Assets/Models/Plane.obj");
-	plane.SetCameraPosition(m_camera.GetPosition());
-	plane.SetScale({ 0.3f, 0.3f, 0.3f });
-	plane.SetPosition({ 0.0f, 0.0f, -1.0f });
-	m_meshes.push_back(plane);
+	Mesh wall = Mesh();
+	wall.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
+	wall.SetCameraPosition(m_camera.GetPosition());
+	wall.SetScale({ 0.05f, 0.05f, 0.05f });
+	wall.SetPosition({ 0.0f, 1.0f, 1.0f });
+	m_meshes.push_back(wall);
+
 #pragma endregion CreateMeshes
 
 	Fonts f = Fonts();

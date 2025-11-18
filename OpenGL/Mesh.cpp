@@ -15,6 +15,7 @@ Mesh::Mesh() {
 	m_world = glm::mat4();
 	m_lightPosition = { 0, 0 ,0 };
 	m_lightColor = { 1, 1, 1 };
+	m_enableNormalMap = false;
 }
 
 Mesh::~Mesh() {
@@ -29,11 +30,19 @@ void Mesh::Cleanup() {
 	m_textureDiffuse.Cleanup();
 }
 
+string Mesh::RemoveFolder(string _map) {
+	const size_t last_slash_idx = _map.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx) {
+		_map.erase(0, last_slash_idx + 1);
+	}
+	return _map;
+}
 
 
 void Mesh::Create(Shader* _shader, string _file) {
 	m_shader = _shader;
 	
+#pragma region LoadMesh
 	//namespace was originally OpenGL
 	objl::Loader Loader; // Initialize Loader
 	M_ASSERT(Loader.LoadFile(_file) == true, "Failed to load mesh."); // Load obj file
@@ -52,18 +61,26 @@ void Mesh::Create(Shader* _shader, string _file) {
 			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
 		}
 	}
+#pragma endregion LoadMesh
+	//// Remove directory if present.
+	//string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
+	//const size_t last_slash_idx = diffuseNap.find_last_of("\\");
+	//if (std::string::npos != last_slash_idx) {
+	//	diffuseNap.erase(0, last_slash_idx + 1);
+	//}
 
-	// Remove directory if present.
-	string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
-	const size_t last_slash_idx = diffuseNap.find_last_of("\\");
-	if (std::string::npos != last_slash_idx) {
-		diffuseNap.erase(0, last_slash_idx + 1);
-	}
+	m_textureDiffuse = Texture();
+	m_textureDiffuse.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Kd));
 
 	m_textureSpecular = Texture();
-	m_textureSpecular.LoadTexture("../Assets/Textures/" + diffuseNap);
-	m_textureDiffuse = Texture();
-	m_textureDiffuse.LoadTexture("../Assets/Textures/" + diffuseNap);
+	if (Loader.LoadedMaterials[0].map_Ks != "") {
+		m_textureSpecular.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Ks));
+	}
+	m_textureNormal = Texture();
+	if (Loader.LoadedMaterials[0].map_bump != "") {
+		m_textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_bump));
+		m_enableNormalMap = true;
+	}
 
 
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
@@ -86,6 +103,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetMat4("World", m_world);
 	m_shader->SetMat4("WVP", _pv * m_world);
 	m_shader->SetVec3("CameraPosition", m_cameraPosition);
+	m_shader->SetInt("EnableNormalMap", m_enableNormalMap);
 
 	// Configure Light
 	for (unsigned int i = 0; i < Lights.size(); i++)
@@ -112,6 +130,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetFloat("material.specularStrength", 8);
 	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_textureSpecular.GetTexture());
 	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_textureDiffuse.GetTexture());
+	m_shader->SetTextureSampler("material.normalTexture", GL_TEXTURE2, 2, m_textureNormal.GetTexture());
 }
 
 void Mesh::BindAttributes() {
