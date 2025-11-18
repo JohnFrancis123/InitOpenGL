@@ -82,7 +82,7 @@ void GameController::RunGame() {
 		  "../Assets/Textures/Skybox/bottom.jpg",
 		  "../Assets/Textures/Skybox/front.jpg",
 		  "../Assets/Textures/Skybox/back.jpg" });
-
+	////
 	//Mesh plane = Mesh();
 	//plane.Create(&m_shaderDiffuse, "../Assets/Models/Plane.obj");
 	//plane.SetCameraPosition(m_camera.GetPosition());
