@@ -7,7 +7,7 @@ GameController::GameController() {
 	m_shaderColor = { };
 	m_shaderDiffuse = { };
 	m_camera = { };
-	m_meshBoxes.clear();
+	m_meshes.clear();
 	m_meshLight = { };
 }
 
@@ -45,7 +45,7 @@ void GameController::RunGame() {
 	m_shaderFont = Shader();
 	m_shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
 
-
+#pragma region CreateMeshes
 	// Create meshes
 	Mesh m = Mesh();
 	//m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
@@ -55,32 +55,34 @@ void GameController::RunGame() {
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
-	Mesh teapot = Mesh();
-	//teapot.Create(&m_shaderDiffuse, "../Assets/Models/teapot.obj");
-	teapot.Create(&m_shaderDiffuse, "../Assets/Models/torus2.obj");
-	teapot.SetCameraPosition(m_camera.GetPosition());
-	teapot.SetScale({ 0.02f, 0.02f, 0.02f });
-	teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
-	m_meshBoxes.push_back(teapot);
+	Mesh box = Mesh();
+	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
+	box.SetCameraPosition(m_camera.GetPosition());
+	box.SetScale({ 0.25f, 0.25f, 0.25f });
+	box.SetPosition({ 0.0f, 1.0f, 1.0f });
+	m_meshes.push_back(box);
+
+	Mesh wall = Mesh();
+	wall.Create(&m_shaderDiffuse, "../Assets/Models/Wall.obj");
+	wall.SetCameraPosition(m_camera.GetPosition());
+	wall.SetScale({ 0.05f, 0.05f, 0.05f });
+	wall.SetPosition({ 0.0f, 0.0f, 0.0f });
+	m_meshes.push_back(wall);
+#pragma endregion CreateMeshes
 
 	Fonts f = Fonts();
 	f.Create(&m_shaderFont, "arial.ttf", 100);
-	//m_meshBox = Mesh();
-	//m_meshBox.Create(&m_shaderDiffuse);
-	//m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
-	//m_meshBox.SetLightPosition(m_meshLight.GetPosition());
-	//m_meshBox.SetCameraPosition(m_camera.GetPosition());
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 	do
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
-		for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
-			m_meshBoxes[count].Render(m_camera.GetProjection() * m_camera.GetView());
+		for (unsigned int count = 0; count < m_meshes.size(); count++) {
+			m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
 
-		//if ((int)m_meshBoxes.size() == 1)
-		//	m_meshBoxes[0].Render(m_camera.GetProjection() * m_camera.GetView());
+		//if ((int)m_meshes.size() == 1)
+		//	m_meshes[0].Render(m_camera.GetProjection() * m_camera.GetView());
 
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
@@ -107,8 +109,8 @@ void GameController::RunGame() {
 	}
 
 	//m_meshLight.Cleanup(); //cleaning up the mesh, which deletes its vertex buffer
-	for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
-		m_meshBoxes[count].Cleanup();
+	for (unsigned int count = 0; count < m_meshes.size(); count++) {
+		m_meshes[count].Cleanup();
 	}
 	m_shaderDiffuse.Cleanup();
 	m_shaderColor.Cleanup(); //cleaning up the shader, which deletes its program
