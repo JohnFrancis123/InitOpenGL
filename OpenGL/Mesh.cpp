@@ -51,7 +51,7 @@ void Mesh::Create(Shader* _shader, string _file) {
 			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.X);
 			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
 		}
-	}
+	} //
 
 	// Remove directory if present.
 	string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
