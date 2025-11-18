@@ -37,11 +37,13 @@ private:
 	void SetShaderVariables(glm::mat4 _pv);
 	void BindAttributes();
 	string Concat(string _s1, int _index, string _s2);
-
+	string RemoveFolder(string _map);
 	// Members
 	Shader* m_shader; //the shader that will be used to render this mesh
-	Texture m_specularTexture;
-	Texture m_diffuseTexture;
+	
+	Texture m_textureDiffuse;
+	Texture m_textureSpecular;
+	Texture m_textureNormal;
 
 	//Texture m_texture;
 	//Texture m_texture2;

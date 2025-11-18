@@ -6,8 +6,8 @@ vector<Mesh> Mesh::Lights;
 
 Mesh::Mesh() {
 	m_shader = nullptr;
-	m_specularTexture = { };
-	m_diffuseTexture = { };
+	m_textureSpecular = { };
+	m_textureDiffuse = { };
 	m_vertexBuffer = 0;
 	m_position = { 0, 0, 0 };
 	m_rotation = { 0, 0, 0 };
@@ -25,8 +25,8 @@ Mesh::~Mesh() {
 void Mesh::Cleanup() {
 	//glDeleteBuffers(1, &m_indexBuffer);
 	glDeleteBuffers(1, &m_vertexBuffer);
-	m_specularTexture.Cleanup();
-	m_diffuseTexture.Cleanup();
+	m_textureSpecular.Cleanup();
+	m_textureDiffuse.Cleanup();
 }
 
 
@@ -60,10 +60,10 @@ void Mesh::Create(Shader* _shader, string _file) {
 		diffuseNap.erase(0, last_slash_idx + 1);
 	}
 
-	m_specularTexture = Texture();
-	m_specularTexture.LoadTexture("../Assets/Textures/" + diffuseNap);
-	m_diffuseTexture = Texture();
-	m_diffuseTexture.LoadTexture("../Assets/Textures/" + diffuseNap);
+	m_textureSpecular = Texture();
+	m_textureSpecular.LoadTexture("../Assets/Textures/" + diffuseNap);
+	m_textureDiffuse = Texture();
+	m_textureDiffuse.LoadTexture("../Assets/Textures/" + diffuseNap);
 
 
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
@@ -110,8 +110,8 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 
 	// Configure Material
 	m_shader->SetFloat("material.specularStrength", 8);
-	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_specularTexture.GetTexture());
-	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_diffuseTexture.GetTexture());
+	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_textureSpecular.GetTexture());
+	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_textureDiffuse.GetTexture());
 }
 
 void Mesh::BindAttributes() {

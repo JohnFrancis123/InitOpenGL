@@ -60,13 +60,6 @@ void GameController::RunGame() {
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
-	//Mesh teapot = Mesh();
-	//teapot.Create(&m_shaderDiffuse, "../Assets/Models/teapot.obj");
-	//teapot.SetCameraPosition(m_camera.GetPosition());
-	//teapot.SetScale({ 0.02f, 0.02f, 0.02f });
-	//teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
-	//m_meshes.push_back(teapot);
-
 	Mesh box = Mesh();
 	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
 	box.SetCameraPosition(m_camera.GetPosition());
@@ -74,38 +67,17 @@ void GameController::RunGame() {
 	box.SetPosition({ 1.0f, 0.0f, 5.0f });
 	m_meshes.push_back(box);
 
-	Skybox skybox = Skybox();
-	skybox.Create(&m_shaderSkybox, "../Assets/Models/Skybox.obj",
-		{ "../Assets/Textures/Skybox/right.jpg",
-		  "../Assets/Textures/Skybox/left.jpg",
-		  "../Assets/Textures/Skybox/top.jpg",
-		  "../Assets/Textures/Skybox/bottom.jpg",
-		  "../Assets/Textures/Skybox/front.jpg",
-		  "../Assets/Textures/Skybox/back.jpg" });
-	////
-	//Mesh plane = Mesh();
-	//plane.Create(&m_shaderDiffuse, "../Assets/Models/Plane.obj");
-	//plane.SetCameraPosition(m_camera.GetPosition());
-	//plane.SetScale({ 0.3f, 0.3f, 0.3f });
-	//plane.SetPosition({ 0.0f, 0.0f, -1.0f });
-	//m_meshes.push_back(plane);
-
-	//Mesh window = Mesh();
-	//window.Create(&m_shaderDiffuse, "../Assets/Models/Window.obj");
-	//window.SetCameraPosition(m_camera.GetPosition());
-	//window.SetScale({ 0.1f, 0.1f, 0.1f });
-	//window.SetPosition({ 0.0f, 0.0f, 0.0f });
-	//m_meshes.push_back(window);
+	Mesh plane = Mesh();
+	plane.Create(&m_shaderDiffuse, "../Assets/Models/Plane.obj");
+	plane.SetCameraPosition(m_camera.GetPosition());
+	plane.SetScale({ 0.3f, 0.3f, 0.3f });
+	plane.SetPosition({ 0.0f, 0.0f, -1.0f });
+	m_meshes.push_back(plane);
 #pragma endregion CreateMeshes
 
 	Fonts f = Fonts();
 	f.Create(&m_shaderFont, "arial.ttf", 100);
-	//m_meshBox = Mesh();
-	//m_meshBox.Create(&m_shaderDiffuse);
-	//m_meshBox.SetLightColor({ 0.5f, 0.9f, 0.5f });
-	//m_meshBox.SetLightPosition(m_meshLight.GetPosition());
-	//m_meshBox.SetCameraPosition(m_camera.GetPosition());
-	//
+
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 #pragma region Render
 	do
@@ -113,7 +85,6 @@ void GameController::RunGame() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
 		m_camera.Rotate();
 		glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
-		skybox.Render(m_camera.GetProjection() * view);
 		for (unsigned int count = 0; count < m_meshes.size(); count++) {
 			m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
