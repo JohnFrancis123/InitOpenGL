@@ -25,7 +25,7 @@ private:
 	Shader m_shaderFont;
 	Shader m_shaderSkybox;
 	Camera m_camera;
-	vector<Mesh> m_meshBoxes;
+	vector<Mesh> m_meshes;
 	Mesh m_meshLight;
 	Skybox m_skybox;
 };

@@ -7,7 +7,7 @@ GameController::GameController() {
 	m_shaderColor = { };
 	m_shaderDiffuse = { };
 	m_camera = { };
-	m_meshBoxes.clear();
+	m_meshes.clear();
 	m_meshLight = { };
 }
 
@@ -65,14 +65,14 @@ void GameController::RunGame() {
 	//teapot.SetCameraPosition(m_camera.GetPosition());
 	//teapot.SetScale({ 0.02f, 0.02f, 0.02f });
 	//teapot.SetPosition({ 0.0f, 0.0f, 0.0f });
-	//m_meshBoxes.push_back(teapot);
+	//m_meshes.push_back(teapot);
 
 	Mesh box = Mesh();
 	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
 	box.SetCameraPosition(m_camera.GetPosition());
 	box.SetScale({ 0.5f, 0.5f, 0.5f });
 	box.SetPosition({ 1.0f, 0.0f, 5.0f });
-	m_meshBoxes.push_back(box);
+	m_meshes.push_back(box);
 
 	Skybox skybox = Skybox();
 	skybox.Create(&m_shaderSkybox, "../Assets/Models/Skybox.obj",
@@ -88,14 +88,14 @@ void GameController::RunGame() {
 	//plane.SetCameraPosition(m_camera.GetPosition());
 	//plane.SetScale({ 0.3f, 0.3f, 0.3f });
 	//plane.SetPosition({ 0.0f, 0.0f, -1.0f });
-	//m_meshBoxes.push_back(plane);
+	//m_meshes.push_back(plane);
 
 	//Mesh window = Mesh();
 	//window.Create(&m_shaderDiffuse, "../Assets/Models/Window.obj");
 	//window.SetCameraPosition(m_camera.GetPosition());
 	//window.SetScale({ 0.1f, 0.1f, 0.1f });
 	//window.SetPosition({ 0.0f, 0.0f, 0.0f });
-	//m_meshBoxes.push_back(window);
+	//m_meshes.push_back(window);
 #pragma endregion CreateMeshes
 
 	Fonts f = Fonts();
@@ -114,8 +114,8 @@ void GameController::RunGame() {
 		m_camera.Rotate();
 		glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
 		skybox.Render(m_camera.GetProjection() * view);
-		for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
-			m_meshBoxes[count].Render(m_camera.GetProjection() * m_camera.GetView());
+		for (unsigned int count = 0; count < m_meshes.size(); count++) {
+			m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
 
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
@@ -145,8 +145,8 @@ void GameController::RunGame() {
 	}
 
 	//m_meshLight.Cleanup(); //cleaning up the mesh, which deletes its vertex buffer
-	for (unsigned int count = 0; count < m_meshBoxes.size(); count++) {
-		m_meshBoxes[count].Cleanup();
+	for (unsigned int count = 0; count < m_meshes.size(); count++) {
+		m_meshes[count].Cleanup();
 	}
 	skybox.Cleanup();
 	m_shaderDiffuse.Cleanup();
