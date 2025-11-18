@@ -17,6 +17,13 @@ void Shader::Cleanup() {
 	glDeleteProgram(m_programID);
 }
 
+void Shader::SetInt(const char* _name, int _value) {
+	GLint loc = glGetUniformLocation(m_programID, _name);
+	if (loc != -1) {
+		glUniform1i(loc, _value);
+	}
+}
+
 void Shader::SetTextureSampler(const char* _name, GLuint _texUnit, int _texUnitID, int _value) {
 	GLint loc = glGetUniformLocation(m_programID, _name);
 	if (loc != -1) {

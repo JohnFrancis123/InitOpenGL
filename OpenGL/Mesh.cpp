@@ -6,8 +6,8 @@ vector<Mesh> Mesh::Lights;
 
 Mesh::Mesh() {
 	m_shader = nullptr;
-	m_specularTexture = { };
-	m_diffuseTexture = { };
+	m_textureSpecular = { };
+	m_textureDiffuse = { };
 	m_vertexBuffer = 0;
 	m_position = { 0, 0, 0 };
 	m_rotation = { 0, 0, 0 };
@@ -25,15 +25,22 @@ Mesh::~Mesh() {
 void Mesh::Cleanup() {
 	//glDeleteBuffers(1, &m_indexBuffer);
 	glDeleteBuffers(1, &m_vertexBuffer);
-	m_specularTexture.Cleanup();
-	m_diffuseTexture.Cleanup();
+	m_textureSpecular.Cleanup();
+	m_textureDiffuse.Cleanup();
 }
 
-
+string Mesh::RemoveFolder(string _map) {
+	const size_t last_slash_idx = _map.find_last_of("\\/");
+	if (std::string::npos != last_slash_idx) {
+		return _map.erase(0, last_slash_idx + 1);
+	}
+	return _map;
+}
 
 void Mesh::Create(Shader* _shader, string _file) {
 	m_shader = _shader;
 	
+#pragma region LoadMesh
 	//namespace was originally OpenGL
 	objl::Loader Loader; // Initialize Loader
 	M_ASSERT(Loader.LoadFile(_file) == true, "Failed to load mesh."); // Load obj file
@@ -52,19 +59,27 @@ void Mesh::Create(Shader* _shader, string _file) {
 			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
 		}
 	} //
+#pragma endregion LoadMesh
 
 	// Remove directory if present.
-	string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
-	const size_t last_slash_idx = diffuseNap.find_last_of("\\");
-	if (std::string::npos != last_slash_idx) {
-		diffuseNap.erase(0, last_slash_idx + 1);
+	//string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
+	//const size_t last_slash_idx = diffuseNap.find_last_of("\\");
+	//if (std::string::npos != last_slash_idx) {
+	//	diffuseNap.erase(0, last_slash_idx + 1);
+	//}
+
+	m_textureDiffuse = Texture();
+	m_textureDiffuse.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Kd));
+
+	m_textureSpecular = Texture();
+	if (Loader.LoadedMaterials[0].map_Ks != "") {
+		m_textureSpecular.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Ks));
 	}
-
-	m_specularTexture = Texture();
-	m_specularTexture.LoadTexture("../Assets/Textures/" + diffuseNap);
-	m_diffuseTexture = Texture();
-	m_diffuseTexture.LoadTexture("../Assets/Textures/" + diffuseNap);
-
+	m_textureNormal = Texture();
+	if (Loader.LoadedMaterials[0].map_bump != "") {
+		m_textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_bump));
+		m_enableNormalMap = true;
+	}
 
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
@@ -86,6 +101,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetMat4("World", m_world);
 	m_shader->SetMat4("WVP", _pv * m_world);
 	m_shader->SetVec3("CameraPosition", m_cameraPosition);
+	m_shader->SetInt("EnableNormalMap", m_enableNormalMap);
 
 	// Configure Light
 	for (unsigned int i = 0; i < Lights.size(); i++)
@@ -110,8 +126,9 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 
 	// Configure Material
 	m_shader->SetFloat("material.specularStrength", 8);
-	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_specularTexture.GetTexture());
-	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_diffuseTexture.GetTexture());
+	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_textureSpecular.GetTexture());
+	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_textureDiffuse.GetTexture());
+	m_shader->SetTextureSampler("material.normalTexture", GL_TEXTURE2, 2, m_textureNormal.GetTexture());
 }
 
 void Mesh::BindAttributes() {
