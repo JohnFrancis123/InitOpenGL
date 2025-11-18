@@ -4,6 +4,7 @@ in vec3 retNormal;
 in vec2 retTexCoord;
 in vec3 retFragPos;
 in vec3 retViewDirection;
+in mat4 retWorld;
 
 out vec4 FragColor;
 
@@ -12,6 +13,7 @@ struct Material
 	float specularStrength;
 	sampler2D diffuseTexture;
 	sampler2D specularTexture;
+	sampler2D normalTexture;
 };
 
 struct Light
@@ -26,12 +28,14 @@ struct Light
 uniform Material material;
 #define NR_LIGHTS 1
 uniform Light light[NR_LIGHTS];
+uniform bool EnableNormalMap = false;
 
 void main()
 {
 	// Early out if we have no color at this fragment position
 	vec4 diffColor = texture(material.diffuseTexture, retTexCoord);
-	if (texture(material.diffuseTexture, retTexCoord).a == 0)
+	
+	if (texture(diffColor.a) == 0)
 	{
 		discard;
 	}
@@ -40,12 +44,20 @@ void main()
 	for (int i = 0; i < NR_LIGHTS; i++)
 	{
 		vec3 lightDir = normalize(light[i].position - retFragPos); // Normalize, for correct dot product results
+		vec3 normal = retNormal;
+		if(EnableNormalMap == true)
+		{
+			normal = texture(material.normalTexture, retTexCoord).rgb;
+			normal = normal * 2.0f - 1.0f;
+			normal = normalize(mat3(retWorld) * normal);
+		}
+		
 		float lambertianStrength = dot(lightDir, retNormal); // Add lambertian lighting
 		vec3 refl = reflect(-lightDir, retNormal);
 		float specularStrength = pow(max(dot(retViewDirection, refl), 0.0f), material.specularStrength);
 		
-		vec3 ambient = texture(material.diffuseTexture, retTexCoord).rgb * light[i].ambientColor / NR_LIGHTS;
-		vec3 lambertian = lambertianStrength * texture(material.diffuseTexture, retTexCoord).rgb * light[i].diffuseColor;
+		vec3 ambient = diffColor.rgb * light[i].ambientColor / NR_LIGHTS;
+		vec3 lambertian = lambertianStrength * diffColor.rgb * light[i].diffuseColor;
 		vec3 specular = specularStrength * texture(material.specularTexture, retTexCoord).rgb * light[i].specularColor;
 		
 		finalColor += ambient + lambertian + specular; // Calculate final color

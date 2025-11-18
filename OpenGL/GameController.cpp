@@ -120,7 +120,7 @@ void GameController::RunGame() {
 	for (unsigned int count = 0; count < m_meshes.size(); count++) {
 		m_meshes[count].Cleanup();
 	}
-	skybox.Cleanup();
+	//skybox.Cleanup();
 	m_shaderDiffuse.Cleanup();
 	m_shaderColor.Cleanup(); //cleaning up the shader, which deletes its program
 	m_shaderSkybox.Cleanup();
