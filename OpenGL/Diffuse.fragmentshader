@@ -33,9 +33,9 @@ uniform bool EnableNormalMap = false;
 void main()
 {
 	// Early out if we have no color at this fragment position
+
 	vec4 diffColor = texture(material.diffuseTexture, retTexCoord);
-	
-	if (texture(diffColor.a) == 0)
+	if (diffColor.a == 0)
 	{
 		discard;
 	}
@@ -52,11 +52,11 @@ void main()
 			normal = normalize(mat3(retWorld) * normal);
 		}
 		
-		float lambertianStrength = dot(lightDir, retNormal); // Add lambertian lighting
-		vec3 refl = reflect(-lightDir, retNormal);
+		float lambertianStrength = dot(lightDir, normal); // Add lambertian lighting
+		vec3 refl = reflect(-lightDir, normal);
 		float specularStrength = pow(max(dot(retViewDirection, refl), 0.0f), material.specularStrength);
 		
-		vec3 ambient = diffColor.rgb * light[i].ambientColor / NR_LIGHTS;
+		vec3 ambient = (diffColor.rgb * light[i].ambientColor / NR_LIGHTS);
 		vec3 lambertian = lambertianStrength * diffColor.rgb * light[i].diffuseColor;
 		vec3 specular = specularStrength * texture(material.specularTexture, retTexCoord).rgb * light[i].specularColor;
 		
