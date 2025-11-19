@@ -61,6 +61,11 @@ void Shader::LoadAttributes() {
 	m_attrNormals = glGetAttribLocation(m_programID, "normals"); // Get a handle for the normals buffer
 	m_attrTexCoords = glGetAttribLocation(m_programID, "texCoords"); // Get a handle for the texCoords buffer
 	m_attrWVP = glGetUniformLocation(m_programID, "WVP"); // Get a handle for the WVP matrix
+
+
+	//printf("Shader %u attribs: verts=%d colors=%d normals=%d tex=%d WVP=%d\n",
+	//	m_programID,
+	//	(int)m_attrVertices, (int)m_attrColors, (int)m_attrNormals, (int)m_attrTexCoords, (int)m_attrWVP);
 }
 
 void Shader::EvaluateShader(int _infoLength, GLuint _id) {

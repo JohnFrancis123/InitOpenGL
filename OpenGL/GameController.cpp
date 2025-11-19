@@ -77,7 +77,7 @@ void GameController::RunGame() {
 #pragma endregion CreateMeshes
 
 	Fonts f = Fonts();
-	f.Create(&m_shaderFont, "arial.ttf", 100);
+	f.Create(&m_shaderFont, "arial.ttf", 40);
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 #pragma region Render
