@@ -10,7 +10,7 @@ Camera::Camera() {
 }
 
 Camera::Camera(Resolution _screenResolution) {
-	m_position = { 0, 0, 0 };
+	m_position = {3, 3, 3};
 	m_lookAt = { 0, 0, 0 };
 	m_rotation = { 0, 0, 0 };
 	m_angle = 0;
@@ -32,9 +32,9 @@ Camera::Camera(Resolution _screenResolution) {
 }
 
 void Camera::Rotate() {
-	m_angle += 0.01f;
-	m_lookAt.x = cos(glm::radians(m_angle)) * 100;
-	m_lookAt.z = sin(glm::radians(m_angle)) * 100;
+	//m_angle += 0.01f;
+	//m_lookAt.x = cos(glm::radians(m_angle)) * 100;
+	//m_lookAt.z = sin(glm::radians(m_angle)) * 100;
 
 	// Camera matrix
 	m_view = glm::lookAt(

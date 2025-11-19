@@ -12,6 +12,6 @@ newmtl wire_152173046
 	Ks 0.3500 0.3500 0.3500
 	
 	map_Kd C:\Users\johnF\source\repos\InitOpenGL\Assets\Textures\BrickWall.jpg
-	map_Ks C:\Users\johnF\source\repos\InitOpenGL\Assets\Textures\BrickWallSpecular.jpg
+	map_Ks C:\Users\johnF\source\repos\InitOpenGL\InitOpenGL\Assets\Textures\BrickWallSpecular.jpg
 	map_bump C:\Users\johnF\source\repos\InitOpenGL\Assets\Textures\BrickWallNormal.jpg
 

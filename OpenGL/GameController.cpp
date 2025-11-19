@@ -68,7 +68,7 @@ void GameController::RunGame() {
 	m_meshes.push_back(box);
 
 	Mesh wall = Mesh();
-	wall.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
+	wall.Create(&m_shaderDiffuse, "../Assets/Models/Wall.obj");
 	wall.SetCameraPosition(m_camera.GetPosition());
 	wall.SetScale({ 0.05f, 0.05f, 0.05f });
 	wall.SetPosition({ 0.0f, 1.0f, 1.0f });
