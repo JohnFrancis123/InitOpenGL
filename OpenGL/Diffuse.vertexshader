@@ -20,17 +20,17 @@ out mat3 retTBN;
 
 void main()
 {
-    void world = World;
+    mat4 world = World;
+
     if(enableInstancing){
         world *= instanceMatrix;
         gl_Position = WVP * instanceMatrix * vec4(vertices, 1.0);
     }
     else
     {
-        gl_Position = WVP * vec4(vertices, 1.0);)
+        gl_Position = WVP * vec4(vertices, 1.0);
     }
 
-    gl_Position = WVP * vec4(vertices, 1.0);
     retNormal = normalize(mat3(transpose(inverse(world))) * normals);
     retTexCoord = texCoords;
     retFragPos = vec3(world * vec4(vertices, 1.0f));

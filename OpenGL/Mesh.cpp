@@ -62,7 +62,8 @@ void Mesh::CalculateTangents(vector<objl::Vertex> _vertices, objl::Vector3& _tan
 
 void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 	m_shader = _shader;
-	if (m_instanceCount > 1) {
+	m_instanceCount = _instanceCount;
+	if (_instanceCount > 1) {
 		m_enableInstancing = true;
 	}
 
@@ -176,7 +177,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetMat4("WVP", _pv * m_world);
 	m_shader->SetVec3("CameraPosition", m_cameraPosition);
 	m_shader->SetInt("EnableNormalMap", m_enableNormalMap);
-	m_shader->SetInt("EnableInstancing", m_enableInstancing);
+	m_shader->SetInt("enableInstancing", m_enableInstancing);
 
 	// Configure Light
 	for (unsigned int i = 0; i < Lights.size(); i++)
@@ -214,57 +215,60 @@ void Mesh::BindAttributes() {
 		stride += 6; // include tangent and bitangent components
 	}
 
+	m_elementSize = stride;
+
 #pragma region BindVertexData
-	// 1st attribute buffer : vertices
-	glEnableVertexAttribArray(m_shader->GetAttrVertices());
-	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
-		3, //size (3 vertices per primitive)
-		GL_FLOAT, // type
-		GL_FALSE, // normalized?
-		stride * sizeof(float), // stride (8 floats per vertex definition)
-		(void*)0); // array buffer offset
+		// 1st attribute buffer : vertices
+		glEnableVertexAttribArray(m_shader->GetAttrVertices());
+		glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
+			3, //size (3 vertices per primitive)
+			GL_FLOAT, // type
+			GL_FALSE, // normalized?
+			stride * sizeof(float), // stride (8 floats per vertex definition)
+			(void*)0); // array buffer offset
 
-	// 2nd attribute buffer : normals
-	glEnableVertexAttribArray(m_shader->GetAttrNormals());
-	glVertexAttribPointer(m_shader->GetAttrNormals(),
-		3, // size
-		GL_FLOAT, // type
-		GL_FALSE, // normalized?
-		stride * sizeof(float), // stride (8 floats per vertex definition)
-		(void*)(3 * sizeof(float))); // array buffer offset
+		// 2nd attribute buffer : normals
+		glEnableVertexAttribArray(m_shader->GetAttrNormals());
+		glVertexAttribPointer(m_shader->GetAttrNormals(),
+			3, // size
+			GL_FLOAT, // type
+			GL_FALSE, // normalized?
+			stride * sizeof(float), // stride (8 floats per vertex definition)
+			(void*)(3 * sizeof(float))); // array buffer offset
 
-	// 3rd attirbute buffer : texCoords
-	glEnableVertexAttribArray(m_shader->GetAttrTexCoords());
-	glVertexAttribPointer(m_shader->GetAttrTexCoords(), // The attribute we want to configure
-		2, //size (3 vertices per primitive). SHOULD PROBABLY SET TO 3.
-		GL_FLOAT, //type
-		GL_FALSE, //normalized?
-		stride * sizeof(float), //stride (8 floats per vertex definition)
-		(void*)(6 * sizeof(float))); // array buffer offset
+		// 3rd attirbute buffer : texCoords
+		glEnableVertexAttribArray(m_shader->GetAttrTexCoords());
+		glVertexAttribPointer(m_shader->GetAttrTexCoords(), // The attribute we want to configure
+			2, //size (3 vertices per primitive). SHOULD PROBABLY SET TO 3.
+			GL_FLOAT, //type
+			GL_FALSE, //normalized?
+			stride * sizeof(float), //stride (8 floats per vertex definition)
+			(void*)(6 * sizeof(float))); // array buffer offset
+
+		//m_elementSize += 8;
 #pragma endregion BindVertexData
 
 #pragma region BindNormalMapData
-	if (m_enableNormalMap) {
-		// 4th attribute buffer : tangent
-		glEnableVertexAttribArray(m_shader->GetAttrTangents());
-		glVertexAttribPointer(m_shader->GetAttrTangents(),
-			3,
-			GL_FLOAT,
-			GL_FALSE,
-			stride * sizeof(float),
-			(void*)(8 * sizeof(float)));
+		if (m_enableNormalMap) {
+			// 4th attribute buffer : tangent
+			glEnableVertexAttribArray(m_shader->GetAttrTangents());
+			glVertexAttribPointer(m_shader->GetAttrTangents(),
+				3,
+				GL_FLOAT,
+				GL_FALSE,
+				stride * sizeof(float),
+				(void*)(8 * sizeof(float)));
 
-		// 4th attribute buffer : bitangent
-		glEnableVertexAttribArray(m_shader->GetAttrBitangents());
-		glVertexAttribPointer(m_shader->GetAttrBitangents(),
-			3,
-			GL_FLOAT,
-			GL_FALSE,
-			stride * sizeof(float),
-			(void*)(11 * sizeof(float)));
-		m_elementSize += 6;
-	}
-
+			// 4th attribute buffer : bitangent
+			glEnableVertexAttribArray(m_shader->GetAttrBitangents());
+			glVertexAttribPointer(m_shader->GetAttrBitangents(),
+				3,
+				GL_FLOAT,
+				GL_FALSE,
+				stride * sizeof(float),
+				(void*)(11 * sizeof(float)));
+			//m_elementSize += 6;
+		}
 #pragma endregion BindNormalMapData
 
 #pragma region BindInstancingData
