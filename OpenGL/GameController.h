@@ -28,6 +28,7 @@ private:
 	vector<Mesh> m_meshes;
 	Mesh m_meshLight;
 	Skybox m_skybox;
+	GLuint vao;
 };
 
 #endif // GAME_CONTROLLER_H

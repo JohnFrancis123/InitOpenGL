@@ -28,6 +28,9 @@ void GameController::Initialize() {
 	//glCullFace(GL_BACK);
 	//glFrontFace(GL_CW);
 	srand(time(0));
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	// Create a default perspective camera
 	m_camera = Camera(WindowController::GetInstance().GetResolution());
 
@@ -60,14 +63,14 @@ void GameController::RunGame() {
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
-	for (int i = 0; i < 1000; i++) {
+	//for (int i = 0; i < 1000; i++) {
 	Mesh box = Mesh();
-	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
+	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj", 1000);
 	box.SetCameraPosition(m_camera.GetPosition());
 	box.SetScale({ 0.25f, 0.25f, 0.25f });
 	box.SetPosition({ 0.0f, 1.0f, 1.0f });
 	m_meshes.push_back(box);
-	}
+	//}
 
 	//Mesh fighter = Mesh();
 	//fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");

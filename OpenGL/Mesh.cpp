@@ -15,8 +15,10 @@ Mesh::Mesh() {
 	m_world = glm::mat4();
 	m_lightPosition = { 0, 0 ,0 };
 	m_lightColor = { 1, 1, 1 };
-	m_elementSize = 0;
 	m_enableNormalMap = false;
+	m_instanceCount = 1;
+	m_enableInstancing = false;
+	m_elementSize = 0;
 }
 
 Mesh::~Mesh() {
@@ -58,8 +60,12 @@ void Mesh::CalculateTangents(vector<objl::Vertex> _vertices, objl::Vector3& _tan
 }
 
 
-void Mesh::Create(Shader* _shader, string _file) {
+void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 	m_shader = _shader;
+	if (m_instanceCount > 1) {
+		m_enableInstancing = true;
+	}
+
 	
 #pragma region LoadMesh
 	//namespace was originally OpenGL
@@ -131,6 +137,27 @@ void Mesh::Create(Shader* _shader, string _file) {
 	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
 	glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW); //uploading the data from m_vertexData to the GPU. We call this whenever the data changes.
+	glBindBuffer(GL_ARRAY_BUFFER, 0); 
+
+	if (m_enableInstancing) {
+		glGenBuffers(1, &m_instanceBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, m_instanceBuffer);
+
+		srand(glfwGetTime()); // Initialize random seed for random positioning
+		for (unsigned int i = 0; i < m_instanceCount; i++) {
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(-20 + rand() % 40, -10 + rand() % 20, -10 + rand() % 20));
+			
+			for(int x = 0; x < 4; x++) {
+				for (int y = 0; y < 4; y++) {
+					m_instanceData.push_back(model[x][y]);
+				}
+			}
+		}
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, m_instanceCount * sizeof(glm::mat4), m_instanceData.data(), GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 string Mesh::Concat(string _s1, int _index, string _s2) {
@@ -149,6 +176,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 	m_shader->SetMat4("WVP", _pv * m_world);
 	m_shader->SetVec3("CameraPosition", m_cameraPosition);
 	m_shader->SetInt("EnableNormalMap", m_enableNormalMap);
+	m_shader->SetInt("EnableInstancing", m_enableInstancing);
 
 	// Configure Light
 	for (unsigned int i = 0; i < Lights.size(); i++)
@@ -183,9 +211,10 @@ void Mesh::BindAttributes() {
 
 	int stride = 8;
 	if (m_enableNormalMap) {
-		stride += 6;
+		stride += 6; // include tangent and bitangent components
 	}
 
+#pragma region BindVertexData
 	// 1st attribute buffer : vertices
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
 	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
@@ -212,7 +241,9 @@ void Mesh::BindAttributes() {
 		GL_FALSE, //normalized?
 		stride * sizeof(float), //stride (8 floats per vertex definition)
 		(void*)(6 * sizeof(float))); // array buffer offset
+#pragma endregion BindVertexData
 
+#pragma region BindNormalMapData
 	if (m_enableNormalMap) {
 		// 4th attribute buffer : tangent
 		glEnableVertexAttribArray(m_shader->GetAttrTangents());
@@ -231,8 +262,54 @@ void Mesh::BindAttributes() {
 			GL_FALSE,
 			stride * sizeof(float),
 			(void*)(11 * sizeof(float)));
-		//m_elementSize += 6
+		m_elementSize += 6;
 	}
+
+#pragma endregion BindNormalMapData
+
+#pragma region BindInstancingData
+	if (m_enableInstancing) {
+		glBindBuffer(GL_ARRAY_BUFFER, m_instanceBuffer);
+
+		// set the attribute pointers for instance matrix (4 times each)
+		glEnableVertexAttribArray(m_shader->GetAttrInstanceMatrix());
+		glVertexAttribPointer(m_shader->GetAttrInstanceMatrix(),
+			4,
+			GL_FLOAT,
+			GL_FALSE,
+			sizeof(glm::mat4),
+			(void*)0);
+
+		glEnableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 1);
+		glVertexAttribPointer(m_shader->GetAttrInstanceMatrix() + 1,
+			4,
+			GL_FLOAT,
+			GL_FALSE,
+			sizeof(glm::mat4),
+			(void*)(sizeof(glm::vec4)));
+
+		glEnableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 2);
+		glVertexAttribPointer(m_shader->GetAttrInstanceMatrix() + 2,
+			4,
+			GL_FLOAT,
+			GL_FALSE,
+			sizeof(glm::mat4),
+			(void*)(2 * sizeof(glm::vec4)));
+
+		glEnableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 3);
+		glVertexAttribPointer(m_shader->GetAttrInstanceMatrix() + 3,
+			4,
+			GL_FLOAT,
+			GL_FALSE,
+			sizeof(glm::mat4),
+			(void*)(3 * sizeof(glm::vec4)));
+
+		glVertexAttribDivisor(m_shader->GetAttrInstanceMatrix(), 1);
+		glVertexAttribDivisor(m_shader->GetAttrInstanceMatrix() + 1, 1);
+		glVertexAttribDivisor(m_shader->GetAttrInstanceMatrix() + 2, 1);
+		glVertexAttribDivisor(m_shader->GetAttrInstanceMatrix() + 3, 1);
+	}
+#pragma endregion BindInstancingData
 }
 
 void Mesh::Render(glm::mat4 _pv) {
@@ -243,15 +320,26 @@ void Mesh::Render(glm::mat4 _pv) {
 	CalculateTransform();
 	SetShaderVariables(_pv);
 	BindAttributes();
-
-	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
+	if (m_enableInstancing) {
+		glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize, m_instanceCount);
+	}
+	else {
+		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
+	}
 	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
 	// disable tangent attributes only if they were enabled
+
+	glDisableVertexAttribArray(m_shader->GetAttrNormals());
+	glDisableVertexAttribArray(m_shader->GetAttrVertices());
+	glDisableVertexAttribArray(m_shader->GetAttrTexCoords());
 	if (m_enableNormalMap) {
 		glDisableVertexAttribArray(m_shader->GetAttrTangents());
 		glDisableVertexAttribArray(m_shader->GetAttrBitangents());
 	}
-	glDisableVertexAttribArray(m_shader->GetAttrNormals());
-	glDisableVertexAttribArray(m_shader->GetAttrVertices());
-	glDisableVertexAttribArray(m_shader->GetAttrTexCoords());
+	if (m_enableInstancing) {
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix());
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 1);
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 2);
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 3);
+	}
 }

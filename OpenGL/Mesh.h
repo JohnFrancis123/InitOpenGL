@@ -25,7 +25,7 @@ public:
 	void SetCameraPosition(glm::vec3 _cameraPosition) { m_cameraPosition = _cameraPosition; }
 
 	// Methods
-	void Create(Shader* _shader, string _file);
+	void Create(Shader* _shader, string _file, int _instanceCount = 1);
 	void Cleanup();
 	void CalculateTransform();
 	void Render();
@@ -52,12 +52,14 @@ private:
 
 	GLuint m_vertexBuffer; //this is held on the VRAM
 	GLuint m_indexBuffer; // GPU buffer
+	GLuint m_instanceBuffer; // GPU buffer for instancing
 	std::vector<GLfloat> m_vertexData; // Store vertex data in RAM
 	std::vector<GLubyte> m_indexData; // Store index data in RAM
-	
-	int m_elementSize;
-
+	std::vector<GLfloat> m_instanceData; // Store instance data in RAM
 	bool m_enableNormalMap;
+	int m_instanceCount;
+	bool m_enableInstancing;
+	int m_elementSize;
 
 	// Transform
 	glm::vec3 m_position;

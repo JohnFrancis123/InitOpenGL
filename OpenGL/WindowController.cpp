@@ -18,7 +18,7 @@ void WindowController::NewWindow() {
 	// Open a window and create its OpenGL context
 	glfwWindowHint(GLFW_SAMPLES, 4); //if can, use 4x antialiasing
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //if we can, initialize version 3.1 of openGL. Otherwise, use a lower version
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	M_ASSERT((m_window = glfwCreateWindow(1024, 768, "A sample scene", NULL, NULL)) != nullptr, "Failed to open GLFW window."); // Open a window and create its OpenGL context
 	glfwMakeContextCurrent(m_window); //initialize GLEW to set this as our current window
 }
