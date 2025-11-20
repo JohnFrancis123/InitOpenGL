@@ -35,7 +35,7 @@ void GameController::Initialize() {
 }
 
 void GameController::RunGame() {
-	
+
 	// Show the C++/CLI tool window
 	//OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
 	//window->Show();
@@ -60,19 +60,21 @@ void GameController::RunGame() {
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
-	//Mesh box = Mesh();
-	//box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
-	//box.SetCameraPosition(m_camera.GetPosition());
-	//box.SetScale({ 0.25f, 0.25f, 0.25f });
-	//box.SetPosition({ 0.0f, 1.0f, 1.0f });
-	//m_meshes.push_back(box);
+	for (int i = 0; i < 1000; i++) {
+	Mesh box = Mesh();
+	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj");
+	box.SetCameraPosition(m_camera.GetPosition());
+	box.SetScale({ 0.25f, 0.25f, 0.25f });
+	box.SetPosition({ 0.0f, 1.0f, 1.0f });
+	m_meshes.push_back(box);
+	}
 
-	Mesh fighter = Mesh();
-	fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");
-	fighter.SetCameraPosition(m_camera.GetPosition());
-	fighter.SetScale({ 0.002f, 0.002f, 0.002f });
-	fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
-	m_meshes.push_back(fighter);
+	//Mesh fighter = Mesh();
+	//fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");
+	//fighter.SetCameraPosition(m_camera.GetPosition());
+	//fighter.SetScale({ 0.002f, 0.002f, 0.002f });
+	//fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
+	//m_meshes.push_back(fighter);
 
 	//Mesh wall = Mesh();
 	//wall.Create(&m_shaderDiffuse, "../Assets/Models/Wall.obj");
@@ -88,9 +90,23 @@ void GameController::RunGame() {
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 #pragma region Render
+	double lastTime = glfwGetTime();
+	int fps = 0;
+	string fpsS = "0";
+
 	do
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
+		
+		double currentTime = glfwGetTime();
+		fps++;
+		if (currentTime - lastTime >= 1.0) {
+			fpsS = "FPS: " + to_string(fps);
+			fps = 0;
+			lastTime = currentTime;
+		}
+		f.RenderText(fpsS, 100, 100, 0.5f, { 1.0f, 1.0f, 0.0f });
+
 		m_camera.Rotate();
 		glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
 		for (unsigned int count = 0; count < m_meshes.size(); count++) {
