@@ -15,6 +15,7 @@ Mesh::Mesh() {
 	m_world = glm::mat4();
 	m_lightPosition = { 0, 0 ,0 };
 	m_lightColor = { 1, 1, 1 };
+	m_elementSize = 0;
 	m_enableNormalMap = false;
 }
 
@@ -45,7 +46,7 @@ void Mesh::CalculateTangents(vector<objl::Vertex> _vertices, objl::Vector3& _tan
 	objl::Vector2 deltaUV1 = _vertices[1].TextureCoordinate - _vertices[0].TextureCoordinate;
 	objl::Vector2 deltaUV2 = _vertices[2].TextureCoordinate - _vertices[0].TextureCoordinate;
 
-	float f = 1.0f / deltaUV1.X * deltaUV2.Y - deltaUV2.X * deltaUV1.Y;
+	float f = 1.0f / (deltaUV1.X * deltaUV2.Y - deltaUV2.X * deltaUV1.Y);
 
 	_tangent.X = f * (deltaUV2.Y * edge1.X - deltaUV1.Y * edge2.X);
 	_tangent.Y = f * (deltaUV2.Y * edge1.Y - deltaUV1.Y * edge2.Y);
@@ -80,7 +81,7 @@ void Mesh::Create(Shader* _shader, string _file) {
 			triangle.push_back(curMesh.Vertices[j + 2]);
 			CalculateTangents(triangle, tangent, bitangent);
 			tangents.push_back(tangent);
-			bitangents.push_back(tangent);
+			bitangents.push_back(bitangent);
 		}
 
 		for (unsigned int j = 0; j < curMesh.Vertices.size(); j++) 
@@ -180,13 +181,18 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 void Mesh::BindAttributes() {
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // Bind the vertex buffer
 
+	int stride = 8;
+	if (m_enableNormalMap) {
+		stride += 6;
+	}
+
 	// 1st attribute buffer : vertices
 	glEnableVertexAttribArray(m_shader->GetAttrVertices());
 	glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
 		3, //size (3 vertices per primitive)
 		GL_FLOAT, // type
 		GL_FALSE, // normalized?
-		8 * sizeof(float), // stride (8 floats per vertex definition)
+		stride * sizeof(float), // stride (8 floats per vertex definition)
 		(void*)0); // array buffer offset
 
 	// 2nd attribute buffer : normals
@@ -195,7 +201,7 @@ void Mesh::BindAttributes() {
 		3, // size
 		GL_FLOAT, // type
 		GL_FALSE, // normalized?
-		8 * sizeof(float), // stride (8 floats per vertex definition)
+		stride * sizeof(float), // stride (8 floats per vertex definition)
 		(void*)(3 * sizeof(float))); // array buffer offset
 
 	// 3rd attirbute buffer : texCoords
@@ -204,7 +210,7 @@ void Mesh::BindAttributes() {
 		2, //size (3 vertices per primitive). SHOULD PROBABLY SET TO 3.
 		GL_FLOAT, //type
 		GL_FALSE, //normalized?
-		8 * sizeof(float), //stride (8 floats per vertex definition)
+		stride * sizeof(float), //stride (8 floats per vertex definition)
 		(void*)(6 * sizeof(float))); // array buffer offset
 
 	if (m_enableNormalMap) {
@@ -214,7 +220,7 @@ void Mesh::BindAttributes() {
 			3,
 			GL_FLOAT,
 			GL_FALSE,
-			8 * sizeof(float),
+			stride * sizeof(float),
 			(void*)(8 * sizeof(float)));
 
 		// 4th attribute buffer : bitangent
@@ -223,7 +229,7 @@ void Mesh::BindAttributes() {
 			3,
 			GL_FLOAT,
 			GL_FALSE,
-			8 * sizeof(float),
+			stride * sizeof(float),
 			(void*)(11 * sizeof(float)));
 		//m_elementSize += 6
 	}
@@ -240,6 +246,11 @@ void Mesh::Render(glm::mat4 _pv) {
 
 	glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
 	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
+	// disable tangent attributes only if they were enabled
+	if (m_enableNormalMap) {
+		glDisableVertexAttribArray(m_shader->GetAttrTangents());
+		glDisableVertexAttribArray(m_shader->GetAttrBitangents());
+	}
 	glDisableVertexAttribArray(m_shader->GetAttrNormals());
 	glDisableVertexAttribArray(m_shader->GetAttrVertices());
 	glDisableVertexAttribArray(m_shader->GetAttrTexCoords());

@@ -54,6 +54,9 @@ private:
 	GLuint m_indexBuffer; // GPU buffer
 	std::vector<GLfloat> m_vertexData; // Store vertex data in RAM
 	std::vector<GLubyte> m_indexData; // Store index data in RAM
+	
+	int m_elementSize;
+
 	bool m_enableNormalMap;
 
 	// Transform
