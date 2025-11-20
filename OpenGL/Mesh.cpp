@@ -51,9 +51,9 @@ void Mesh::CalculateTangents(vector<objl::Vertex> _vertices, objl::Vector3& _tan
 	_tangent.Y = f * (deltaUV2.Y * edge1.Y - deltaUV1.Y * edge2.Y);
 	_tangent.Z = f * (deltaUV2.Y * edge1.Z - deltaUV1.Y * edge2.Z);
 
-	_bitangent.X = f * (-deltaUV2.X * edge1.X - deltaUV1.X * edge2.X);
-	_bitangent.Y = f * (-deltaUV2.X * edge1.Y - deltaUV1.X * edge2.Y);
-	_bitangent.Z = f * (-deltaUV2.X * edge1.Z - deltaUV1.X * edge2.Z);
+	_bitangent.X = f * (-deltaUV2.X * edge1.X + deltaUV1.X * edge2.X);
+	_bitangent.Y = f * (-deltaUV2.X * edge1.Y + deltaUV1.X * edge2.Y);
+	_bitangent.Z = f * (-deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
 }
 
 
@@ -207,8 +207,26 @@ void Mesh::BindAttributes() {
 		8 * sizeof(float), //stride (8 floats per vertex definition)
 		(void*)(6 * sizeof(float))); // array buffer offset
 
-	
+	if (m_enableNormalMap) {
+		// 4th attribute buffer : tangent
+		glEnableVertexAttribArray(m_shader->GetAttrTangents());
+		glVertexAttribPointer(m_shader->GetAttrTangents(),
+			3,
+			GL_FLOAT,
+			GL_FALSE,
+			8 * sizeof(float),
+			(void*)(8 * sizeof(float)));
 
+		// 4th attribute buffer : bitangent
+		glEnableVertexAttribArray(m_shader->GetAttrBitangents());
+		glVertexAttribPointer(m_shader->GetAttrBitangents(),
+			3,
+			GL_FLOAT,
+			GL_FALSE,
+			8 * sizeof(float),
+			(void*)(11 * sizeof(float)));
+		//m_elementSize += 6
+	}
 }
 
 void Mesh::Render(glm::mat4 _pv) {
