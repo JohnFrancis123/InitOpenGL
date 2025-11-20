@@ -3,6 +3,7 @@
 
 #include "StandardIncludes.h"
 #include "Texture.h"
+#include "OBJ_Loader.h"
 
 class Shader;
 
@@ -38,6 +39,7 @@ private:
 	void BindAttributes();
 	string Concat(string _s1, int _index, string _s2);
 	string RemoveFolder(string _map);
+	void CalculateTangents(vector<objl::Vertex> _vertices, objl::Vector3& _tangent, objl::Vector3& _bitangent);
 	// Members
 	Shader* m_shader; //the shader that will be used to render this mesh
 	
@@ -52,8 +54,8 @@ private:
 	GLuint m_indexBuffer; // GPU buffer
 	std::vector<GLfloat> m_vertexData; // Store vertex data in RAM
 	std::vector<GLubyte> m_indexData; // Store index data in RAM
-
 	bool m_enableNormalMap;
+
 	// Transform
 	glm::vec3 m_position;
 	glm::vec3 m_rotation;
