@@ -129,7 +129,7 @@ void GameController::RunGame() {
 		}
 		m_postProcessor.End();
 
-		f.RenderText(fpsS, 100, 400, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(fpsS, 100, 300, 0.5f, { 1.0f, 1.0f, 0.0f });
 		//f.RenderText("HELLO", 100, 100, 0.5f, {1.0f, 1.0f, 0.0f});
 
 		//f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
