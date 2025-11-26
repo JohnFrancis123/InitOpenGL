@@ -10,7 +10,7 @@ Camera::Camera() {
 }
 
 Camera::Camera(Resolution _screenResolution) {
-	m_position = {3, 3, 3};
+	m_position = {4, 4, 4};
 	m_lookAt = { 0, 0, 0 };
 	m_rotation = { 0, 0, 0 };
 	m_angle = 0;

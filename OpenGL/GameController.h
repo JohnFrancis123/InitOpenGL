@@ -8,6 +8,7 @@
 #include "WindowController.h"
 #include "Camera.h"
 #include "Fonts.h"
+#include "PostProcessor.h"
 //#include "Camera2.h"
 
 class GameController : public Singleton<GameController>
@@ -23,8 +24,10 @@ private:
 	Shader m_shaderColor;
 	Shader m_shaderDiffuse;
 	Shader m_shaderFont;
+	Shader m_shaderPost;
 	Shader m_shaderSkybox;
 	Camera m_camera;
+	PostProcessor m_postProcessor;
 	vector<Mesh> m_meshes;
 	Mesh m_meshLight;
 	Skybox m_skybox;

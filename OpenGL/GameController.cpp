@@ -9,6 +9,8 @@ GameController::GameController() {
 	m_camera = { };
 	m_meshes.clear();
 	m_meshLight = { };
+	m_shaderFont = { };
+	m_shaderPost = { };
 }
 
 GameController::~GameController() {
@@ -18,7 +20,7 @@ void GameController::Initialize() {
 	GLFWwindow* window = WindowController::GetInstance().GetWindow(); // Call this first, as it creates a window required by GLEW
 	M_ASSERT(glewInit() == GLEW_OK, "Failed to initialize GLEW."); // Initialize GLEW
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
-	glClearColor(0.1f, 0.1f, 0.1f, 0.1f); // Grey background
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
 
 	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
@@ -34,7 +36,9 @@ void GameController::Initialize() {
 	// Create a default perspective camera
 	m_camera = Camera(WindowController::GetInstance().GetResolution());
 
-	//m_camera2 = Camera2(WindowController::GetInstance().GetResolution()); //new camera class.
+	Resolution r = WindowController::GetInstance().GetResolution();
+	glViewport(0, 0, r.m_width, r.m_height);
+	m_camera = Camera(r);
 }
 
 void GameController::RunGame() {
@@ -52,6 +56,8 @@ void GameController::RunGame() {
 	m_shaderSkybox.LoadShaders("Skybox.vertexshader", "Skybox.fragmentshader");
 	m_shaderFont = Shader();
 	m_shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
+	m_shaderPost = Shader();
+	m_shaderPost.LoadShaders("PostProcessor.vertexshader", "PostProcessor.fragmentshader");
 #pragma endregion SetupShaders
 
 #pragma region CreateMeshes
@@ -65,9 +71,9 @@ void GameController::RunGame() {
 
 	//for (int i = 0; i < 1000; i++) {
 	Mesh box = Mesh();
-	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj", 1000);
+	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj", 10);
 	box.SetCameraPosition(m_camera.GetPosition());
-	box.SetScale({ 0.05f, 0.05f, 0.05f });
+	box.SetScale({ 0.1f, 0.1f, 0.1f });
 	box.SetPosition({ 0.0f, 0.0f, 0.0f });
 	m_meshes.push_back(box);
 	//}
@@ -89,7 +95,9 @@ void GameController::RunGame() {
 #pragma endregion CreateMeshes
 
 	Fonts f = Fonts();
-	f.Create(&m_shaderFont, "arial.ttf", 100);
+	f.Create(&m_shaderFont, "arial.ttf", 40);
+	m_postProcessor = PostProcessor();
+	m_postProcessor.Create(&m_shaderPost);
 
 	GLFWwindow* win = WindowController::GetInstance().GetWindow();
 #pragma region Render
@@ -100,17 +108,9 @@ void GameController::RunGame() {
 	do
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
-		
-		double currentTime = glfwGetTime();
-		fps++;
-		if (currentTime - lastTime >= 1.0) {
-			fpsS = "FPS: " + to_string(fps);
-			fps = 0;
-			lastTime = currentTime;
-		}
-		f.RenderText(fpsS, 100, 100, 0.5f, { 1.0f, 1.0f, 0.0f });
 
-		m_camera.Rotate();
+		m_postProcessor.Start();
+		//m_camera.Rotate();
 		glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
 		for (unsigned int count = 0; count < m_meshes.size(); count++) {
 			m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
@@ -119,12 +119,24 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
+
+		double currentTime = glfwGetTime();
+		fps++;
+		if (currentTime - lastTime >= 1.0) {
+			fpsS = "FPS: " + to_string(fps);
+			fps = 0;
+			lastTime = currentTime;
+		}
+		m_postProcessor.End();
+
+
+		f.RenderText(fpsS, 100, 100, 0.5f, { 1.0f, 1.0f, 0.0f });
+
 		//f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
 
 		//f.RenderText("Testing Text", 10, 700, 0.5f, { 1.0f, 0.0f, 0.0f });
 
 		//f.RenderText("Testing Text", 800, 700, 0.5f, { 1.0f, 1.0f, 1.0f });
-
 
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input
@@ -147,8 +159,11 @@ void GameController::RunGame() {
 		m_meshes[count].Cleanup();
 	}
 	//skybox.Cleanup();
+	f.Cleanup();
+	m_postProcessor.Cleanup();
 	m_shaderDiffuse.Cleanup();
 	m_shaderColor.Cleanup(); //cleaning up the shader, which deletes its program
 	m_shaderSkybox.Cleanup();
+	m_shaderFont.Cleanup();
 }
 #pragma endregion Cleanup

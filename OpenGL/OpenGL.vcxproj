@@ -144,6 +144,7 @@ copy /Y "$(SolutionDir)\External\glfw-3.3.4\lib-vc2019\glfw3.dll" "$(TargetDir)"
     <ClCompile Include="GameController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="PostProcessor.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -156,6 +157,7 @@ copy /Y "$(SolutionDir)\External\glfw-3.3.4\lib-vc2019\glfw3.dll" "$(TargetDir)"
     <ClInclude Include="Fonts.h" />
     <ClInclude Include="GameController.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="PostProcessor.h" />
     <ClInclude Include="Resolution.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Singleton.h" />
@@ -187,6 +189,8 @@ copy /Y "$(SolutionDir)\External\glfw-3.3.4\lib-vc2019\glfw3.dll" "$(TargetDir)"
     <None Include="Diffuse.vertexshader" />
     <None Include="Font.fragmentshader" />
     <None Include="Font.vertexshader" />
+    <None Include="PostProcessor.fragmentshader" />
+    <None Include="PostProcessor.vertexshader" />
     <None Include="Skybox.fragmentshader" />
     <None Include="Skybox.vertexshader" />
   </ItemGroup>
