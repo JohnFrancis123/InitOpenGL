@@ -10,5 +10,9 @@ void main()
 	//vec3 col = texture(ScreenTexture, retTexCoord).rgb;
 	//FragColor = vec4(col, 1.0); // output 1 no effect
 
-	FragColor = vec4(vec3(1.0 - texture(ScreenTexture, retTexCoord)), 1.0); // output 3 invert colors))
+	//FragColor = vec4(vec3(1.0 - texture(ScreenTexture, retTexCoord)), 1.0); // output 3 invert colors))
+	
+	vec3 col = texture(ScreenTexture, retTexCoord).rgb;
+	float average = (col.r + col.g + col.b) / 3;
+	FragColor = vec4(average, average, average, 1.0); // output 4:  grayscale)
 }
