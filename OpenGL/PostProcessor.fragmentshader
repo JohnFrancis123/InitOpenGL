@@ -21,11 +21,11 @@ void main()
         vec2( offset, -offset)  // bottom-right
     ); // end of offsets array
 
-    // Sharpen kernel
+    // Edge detection kernel
     float kernel[9] = float[](
-        -1, -1, -1,
-        -1,  9, -1,
-        -1, -1, -1
+         1,  1,  1,
+         1, -8,  1,
+         1,  1,  1
     ); // end of kernel array
 
     vec3 sampleTex[9];
