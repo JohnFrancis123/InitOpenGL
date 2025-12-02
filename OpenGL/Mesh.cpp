@@ -2,6 +2,11 @@
 #include "Shader.h" // Add this include to resolve incomplete type error
 #include "OBJ_Loader.h"
 
+#include <msclr/marshal_cppstd.h>
+
+#include "ASEMesh.h"
+using namespace ASEMeshes;
+
 vector<Mesh> Mesh::Lights;
 
 Mesh::Mesh() {
@@ -59,106 +64,212 @@ void Mesh::CalculateTangents(vector<objl::Vertex> _vertices, objl::Vector3& _tan
 	_bitangent.Z = f * (-deltaUV2.X * edge1.Z + deltaUV1.X * edge2.Z);
 }
 
+bool Mesh::EndsWith(const std::string& _str, const std::string& _suffix) {
+    if (_suffix.size() > _str.size()) return false;
+    auto it = _str.end() - _suffix.size();
+    return std::equal(_suffix.begin(), _suffix.end(), it,
+        [](char a, char b) {
+            return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
+        });
+}
+
 
 void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
-	m_shader = _shader;
-	m_instanceCount = _instanceCount;
-	if (_instanceCount > 1) {
-		m_enableInstancing = true;
-	}
+    m_shader = _shader;
+    m_instanceCount = _instanceCount;
+    if (_instanceCount > 1) {
+        m_enableInstancing = true;
+    }
 
-	
 #pragma region LoadMesh
-	//namespace was originally OpenGL
-	objl::Loader Loader; // Initialize Loader
-	M_ASSERT(Loader.LoadFile(_file) == true, "Failed to load mesh."); // Load obj file
+    if (EndsWith(_file, ".ase"))
+    {
+        // === ASE File Loading Logic (from screenshots) ===
+        ASEMesh^ meshData = gcnew ASEMesh(_file.c_str());
+        meshData->ParseASEFile();
 
-	for (unsigned int i = 0; i < Loader.LoadedMeshes.size(); i++) {
-		objl::Mesh curMesh = Loader.LoadedMeshes[i];
-		
-		vector<objl::Vector3> tangents;
-		vector<objl::Vector3> bitangents;
-		vector<objl::Vertex> triangle;
-		objl::Vector3 tangent;
-		objl::Vector3 bitangent;
-		for (unsigned int j = 0; j < curMesh.Vertices.size(); j += 3) {
-			triangle.clear();
-			triangle.push_back(curMesh.Vertices[j]);
-			triangle.push_back(curMesh.Vertices[j + 1]);
-			triangle.push_back(curMesh.Vertices[j + 2]);
-			CalculateTangents(triangle, tangent, bitangent);
-			tangents.push_back(tangent);
-			bitangents.push_back(bitangent);
-		}
+        MeshInfo^ m = meshData->GeoObjects[0]->MeshI;
+        Material^ mat = meshData->Materials[meshData->GeoObjects[0]->MaterialID];
 
-		for (unsigned int j = 0; j < curMesh.Vertices.size(); j++) 
-		{
-			m_vertexData.push_back(curMesh.Vertices[j].Position.X);
-			m_vertexData.push_back(curMesh.Vertices[j].Position.Y);
-			m_vertexData.push_back(curMesh.Vertices[j].Position.Z);
-			m_vertexData.push_back(curMesh.Vertices[j].Normal.X);
-			m_vertexData.push_back(curMesh.Vertices[j].Normal.Y);
-			m_vertexData.push_back(curMesh.Vertices[j].Normal.Z);
-			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.X);
-			m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
-		
-			if (Loader.LoadedMaterials[0].map_bump != "") {
-				int index = j / 3;
-				m_vertexData.push_back(tangents[index].X);
-				m_vertexData.push_back(tangents[index].Y);
-				m_vertexData.push_back(tangents[index].Z);
-				m_vertexData.push_back(bitangents[index].X);
-				m_vertexData.push_back(bitangents[index].Y);
-				m_vertexData.push_back(bitangents[index].Z);
-			}
-		}
-	}
+        vector<objl::Vector3> tangents;
+        vector<objl::Vector3> bitangents;
+        vector<objl::Vertex> triangle;
+        objl::Vector3 tangent;
+        objl::Vector3 bitangent;
+        int vCount = 0;
+
+        for (int count = 0; count < m->NumFaces; count++)
+        {
+            Vec3^ tF = m->TexFaces[count];
+            Vec3^ f = m->Faces[count];
+            triangle.clear();
+
+            // First Vertex (f->X)
+            objl::Vertex vert = objl::Vertex();
+            vert.Position = objl::Vector3(m->Vertices[(int)f->X]->X, m->Vertices[(int)f->X]->Y, m->Vertices[(int)f->X]->Z);
+            vert.Normal = objl::Vector3(m->VertexNormals[vCount]->X, m->VertexNormals[vCount]->Y, m->VertexNormals[vCount]->Z);
+            vert.TextureCoordinate = objl::Vector2(m->TexVertices[(int)tF->X]->X, m->TexVertices[(int)tF->X]->Y);
+            triangle.push_back(vert);
+            vCount++;
+
+            // Second Vertex (f->Z) - The screenshot only showed X and Z indices being read, skipping Y index. 
+            // This is a difference from standard triangle processing but is implemented as seen in the screenshots.
+            vert = objl::Vertex();
+            vert.Position = objl::Vector3(m->Vertices[(int)f->Z]->X, m->Vertices[(int)f->Z]->Y, m->Vertices[(int)f->Z]->Z);
+            vert.Normal = objl::Vector3(m->VertexNormals[vCount]->X, m->VertexNormals[vCount]->Y, m->VertexNormals[vCount]->Z);
+            vert.TextureCoordinate = objl::Vector2(m->TexVertices[(int)tF->Z]->X, m->TexVertices[(int)tF->Z]->Y);
+            triangle.push_back(vert);
+            vCount++;
+
+            vert = objl::Vertex();
+            vert.Position = objl::Vector3(m->Vertices[(int)f->Y]->X, m->Vertices[(int)f->Y]->Y, m->Vertices[(int)f->Y]->Z);
+            vert.Normal = objl::Vector3(m->VertexNormals[vCount]->X, m->VertexNormals[vCount]->Y, m->VertexNormals[vCount]->Z);
+            vert.TextureCoordinate = objl::Vector2(m->TexVertices[(int)tF->Y]->X, m->TexVertices[(int)tF->Y]->Y);
+            triangle.push_back(vert);
+            vCount++;
+
+
+            CalculateTangents(triangle, tangent, bitangent);
+            tangents.push_back(tangent);
+            bitangents.push_back(bitangent);
+
+            for (int c = 0; c < 3; c++)
+            {
+                m_vertexData.push_back(triangle[c].Position.X);
+                m_vertexData.push_back(triangle[c].Position.Y);
+                m_vertexData.push_back(triangle[c].Position.Z);
+                m_vertexData.push_back(triangle[c].Normal.X);
+                m_vertexData.push_back(triangle[c].Normal.Y);
+                m_vertexData.push_back(triangle[c].Normal.Z);
+                m_vertexData.push_back(triangle[c].TextureCoordinate.X);
+                m_vertexData.push_back(triangle[c].TextureCoordinate.Y);
+
+                int index = (vCount / 3) - 1;
+                m_vertexData.push_back(tangents[index].X);
+                m_vertexData.push_back(tangents[index].Y);
+                m_vertexData.push_back(tangents[index].Z);
+                m_vertexData.push_back(bitangents[index].X);
+                m_vertexData.push_back(bitangents[index].Y);
+                m_vertexData.push_back(bitangents[index].Z);
+            }
+        }
+
+        // Load Textures for ASE
+        m_textureDiffuse = Texture();
+        if ((mat->Maps[0]->Name == "DIFFUSE"))
+        {
+            string fn = msclr::interop::marshal_as<std::string>(mat->Maps[0]->TextureFileName);
+            m_textureDiffuse.LoadTexture("../Assets/Textures/" + RemoveFolder(fn));
+        }
+
+        m_textureSpecular = Texture();
+        if ((mat->Maps[1]->Name == "SPECULAR"))
+        {
+            string fn = msclr::interop::marshal_as<std::string>(mat->Maps[1]->TextureFileName);
+            m_textureSpecular.LoadTexture("../Assets/Textures/" + RemoveFolder(fn));
+        }
+
+        m_textureNormal = Texture();
+        if ((mat->Maps[1]->Name == "BUMP"))
+        {
+            string fn = msclr::interop::marshal_as<std::string>(mat->Maps[1]->TextureFileName);
+            m_textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(fn));
+            m_enableNormalMap = true;
+        }
+        else if ((mat->Maps[2]->Name == "BUMP"))
+        {
+            string fn = msclr::interop::marshal_as<std::string>(mat->Maps[2]->TextureFileName);
+            m_textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(fn));
+            m_enableNormalMap = true;
+        }
+    }
+
+    else // Original OBJ Loading Logic
+    {
+        objl::Loader Loader; // Initialize Loader
+        M_ASSERT(Loader.LoadFile(_file) == true, "Failed to load mesh."); // Load obj file
+
+        for (unsigned int i = 0; i < Loader.LoadedMeshes.size(); i++) {
+            objl::Mesh curMesh = Loader.LoadedMeshes[i];
+
+            vector<objl::Vector3> tangents;
+            vector<objl::Vector3> bitangents;
+            vector<objl::Vertex> triangle;
+            objl::Vector3 tangent;
+            objl::Vector3 bitangent;
+            for (unsigned int j = 0; j < curMesh.Vertices.size(); j += 3) {
+                triangle.clear();
+                triangle.push_back(curMesh.Vertices[j]);
+                triangle.push_back(curMesh.Vertices[j + 1]);
+                triangle.push_back(curMesh.Vertices[j + 2]);
+                CalculateTangents(triangle, tangent, bitangent);
+                tangents.push_back(tangent);
+                bitangents.push_back(bitangent);
+            }
+
+            for (unsigned int j = 0; j < curMesh.Vertices.size(); j++)
+            {
+                m_vertexData.push_back(curMesh.Vertices[j].Position.X);
+                m_vertexData.push_back(curMesh.Vertices[j].Position.Y);
+                m_vertexData.push_back(curMesh.Vertices[j].Position.Z);
+                m_vertexData.push_back(curMesh.Vertices[j].Normal.X);
+                m_vertexData.push_back(curMesh.Vertices[j].Normal.Y);
+                m_vertexData.push_back(curMesh.Vertices[j].Normal.Z);
+                m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.X);
+                m_vertexData.push_back(curMesh.Vertices[j].TextureCoordinate.Y);
+
+                if (Loader.LoadedMaterials[0].map_bump != "") {
+                    int index = j / 3;
+                    m_vertexData.push_back(tangents[index].X);
+                    m_vertexData.push_back(tangents[index].Y);
+                    m_vertexData.push_back(tangents[index].Z);
+                    m_vertexData.push_back(bitangents[index].X);
+                    m_vertexData.push_back(bitangents[index].Y);
+                    m_vertexData.push_back(bitangents[index].Z);
+                }
+            }
+        }
+
+        // Load Textures for OBJ
+        m_textureDiffuse = Texture();
+        m_textureDiffuse.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Kd));
+
+        m_textureSpecular = Texture();
+        if (Loader.LoadedMaterials[0].map_Ks != "") {
+            m_textureSpecular.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Ks));
+        }
+        m_textureNormal = Texture();
+        if (Loader.LoadedMaterials[0].map_bump != "") {
+            m_textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_bump));
+            m_enableNormalMap = true;
+        }
+    }
 #pragma endregion LoadMesh
-	//// Remove directory if present.
-	//string diffuseNap = Loader.LoadedMaterials[0].map_Kd;
-	//const size_t last_slash_idx = diffuseNap.find_last_of("\\");
-	//if (std::string::npos != last_slash_idx) {
-	//	diffuseNap.erase(0, last_slash_idx + 1);
-	//}
 
-	m_textureDiffuse = Texture();
-	m_textureDiffuse.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Kd));
+    glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
+    glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
+    glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW); //uploading the data from m_vertexData to the GPU. We call this whenever the data changes.
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	m_textureSpecular = Texture();
-	if (Loader.LoadedMaterials[0].map_Ks != "") {
-		m_textureSpecular.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_Ks));
-	}
-	m_textureNormal = Texture();
-	if (Loader.LoadedMaterials[0].map_bump != "") {
-		m_textureNormal.LoadTexture("../Assets/Textures/" + RemoveFolder(Loader.LoadedMaterials[0].map_bump));
-		m_enableNormalMap = true;
-	}
+    if (m_enableInstancing) {
+        glGenBuffers(1, &m_instanceBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, m_instanceBuffer);
 
+        srand(glfwGetTime()); // Initialize random seed for random positioning
+        for (unsigned int i = 0; i < m_instanceCount; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-20 + rand() % 40, -10 + rand() % 20, -10 + rand() % 20));
 
-	glGenBuffers(1, &m_vertexBuffer); //generating 1 buffer, which is a vertex buffer, meaning it holds vertices
-	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); //binding the buffer so that we can use it as an array buffer for our vertices
-	glBufferData(GL_ARRAY_BUFFER, m_vertexData.size() * sizeof(float), m_vertexData.data(), GL_STATIC_DRAW); //uploading the data from m_vertexData to the GPU. We call this whenever the data changes.
-	glBindBuffer(GL_ARRAY_BUFFER, 0); 
+            for (int x = 0; x < 4; x++) {
+                for (int y = 0; y < 4; y++) {
+                    m_instanceData.push_back(model[x][y]);
+                }
+            }
+        }
 
-	if (m_enableInstancing) {
-		glGenBuffers(1, &m_instanceBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, m_instanceBuffer);
-
-		srand(glfwGetTime()); // Initialize random seed for random positioning
-		for (unsigned int i = 0; i < m_instanceCount; i++) {
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(-20 + rand() % 40, -10 + rand() % 20, -10 + rand() % 20));
-			
-			for(int x = 0; x < 4; x++) {
-				for (int y = 0; y < 4; y++) {
-					m_instanceData.push_back(model[x][y]);
-				}
-			}
-		}
-	}
-
-	glBufferData(GL_ARRAY_BUFFER, m_instanceCount * sizeof(glm::mat4), m_instanceData.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBufferData(GL_ARRAY_BUFFER, m_instanceCount * sizeof(glm::mat4), m_instanceData.data(), GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
 string Mesh::Concat(string _s1, int _index, string _s2) {
