@@ -1,5 +1,5 @@
-#ifndef ASE_MESH_H
-#define ASE_MESH_H //is there no header guard??
+//#ifndef ASE_MESH_H
+//#define ASE_MESH_H //is there no header guard??
 
 namespace ASEMeshes
 {
@@ -114,4 +114,4 @@ namespace ASEMeshes
 	};
 }
 
-#endif // ASE_MESH_H
+//#endif // ASE_MESH_H
