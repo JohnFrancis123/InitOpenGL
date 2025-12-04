@@ -155,7 +155,7 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 			glm::vec3 p = _mesh.GetPosition();
 			p.z += d.y * transZ; // move along Z from Y
 			_mesh.SetPosition(p);
-		}
+		} //
 		if (m_rotateEnabled) {
 			glm::vec3 r = _mesh.GetRotation();
 			r.y += d.x * rotZ;
