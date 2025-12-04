@@ -149,12 +149,24 @@ void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 		srand(glfwGetTime()); // Initialize random seed for random positioning
 		for (unsigned int i = 0; i < m_instanceCount; i++) {
 			glm::mat4 model = glm::mat4(1.0f);
-			// Spread instances over a larger area and use floating-point randomness for smoother distribution
-			float rx = -50.0f + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 100.0f; // [-50,50]
-			float ry = -25.0f + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 50.0f;  // [-25,25]
-			float rz = -50.0f + static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 100.0f; // [-50,50]
-			model = glm::translate(model, glm::vec3(rx, ry, rz));
-			
+			// pick a random direction and radius so instances originate at 0 and spread outward
+			glm::vec3 dir = glm::normalize(glm::vec3((rand() / (float)RAND_MAX) * 2.0f - 1.0f,
+													 (rand() / (float)RAND_MAX) * 2.0f - 1.0f,
+													 (rand() / (float)RAND_MAX) * 2.0f - 1.0f));
+			// reduce Y influence
+			dir.y *= 0.2f;
+			glm::vec3 dirNorm = glm::normalize(dir);
+			dir = dirNorm;
+			dir *= 100.0f;
+			dir += dirNorm * 300.0f; // push outward some more
+
+			float radius = (rand() / (float)RAND_MAX) * 50.0f; // decent max spread
+			model = glm::translate(model, dir * radius);
+
+			// random uniform scale (minimal change)
+			float scale = 50 + rand() % 151; // scale percent 50..200
+			model = glm::scale(model, glm::vec3(scale / 100.0f));
+
 			for(int x = 0; x < 4; x++) {
 				for (int y = 0; y < 4; y++) {
 					m_instanceData.push_back(model[x][y]);
