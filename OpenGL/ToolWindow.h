@@ -21,10 +21,26 @@ namespace OpenGL {
 
 	public:
 		bool GetMoveLightValue() { return MoveLightRadio->Checked; }
-		bool GetResetLightPosPressed() { return ResetLightPosButton->Pressed; }
+		bool GetTransformValue() { return TransformRadio->Checked; }
+		bool GetWaterSceneValue() { return WaterSceneRadio->Checked; }
+		bool GetSpaceSceneValue() { return SpaceSceneRadio->Checked; }
+		bool GetResetLightPosPressed() { return m_resetLightPosPressed; }
+		bool GetResetTransformPressed() { return m_resetTransformPressed; }
+
+		int GetSpecularStrength() { return SpecularStrength->Value; }
+		double GetSpecularColorR() { return (double)SpecularColorR->Value / 100.0; }
+		double GetSpecularColorG() { return (double)SpecularColorG->Value / 100.0; }
+		double GetSpecularColorB() { return (double)SpecularColorB->Value / 100.0; }
+		double GetFrequency() { return (double)Frequency->Value / 100.0; }
+		double GetAmplitude() { return (double)Amplitude->Value / 100.0; }
+
+		bool GetTranslateEnabled() { return TranslateCheckbox->Checked; }
+		bool GetRotateEnabled() { return RotateCheckbox->Checked; }
+		bool GetScaleEnabled() { return ScaleCheckbox->Checked; }
+		bool GetWireframeEnabled() { return WireframeRenderCheckbox->Checked; }
+		bool GetTintBlueEnabled() { return TintBlueCheckbox->Checked; }
 
 	
-
 
 	static bool RenderRedChannel;
 	static bool RenderGreenChannel;
@@ -70,11 +86,9 @@ namespace OpenGL {
 
 
 
-
 	public:
 
 	public:
-
 
 
 		   static bool RenderBlueChannel;
@@ -82,6 +96,13 @@ namespace OpenGL {
 		ToolWindow(void)
 		{
 			InitializeComponent();
+			// set initial label values (colors, frequency, amplitude are divided by 100)
+			this->SpecularStrengthVal->Text = System::Convert::ToString(this->SpecularStrength->Value);
+			this->ColorRVal->Text = System::String::Format("{0:F2}", (double)this->SpecularColorR->Value / 100.0);
+			this->ColorGVal->Text = System::String::Format("{0:F2}", (double)this->SpecularColorG->Value / 100.0);
+			this->ColorBVal->Text = System::String::Format("{0:F2}", (double)this->SpecularColorB->Value / 100.0);
+			this->FrequencyVal->Text = System::String::Format("{0:F2}", (double)this->Frequency->Value / 100.0);
+			this->AmplitudeVal->Text = System::String::Format("{0:F2}", (double)this->Amplitude->Value / 100.0);
 			//
 			//TODO: Add the constructor code here
 			//
@@ -106,7 +127,6 @@ namespace OpenGL {
 	protected:
 
 	protected:
-
 
 
 	private:
@@ -190,7 +210,7 @@ namespace OpenGL {
 			// 
 			this->WaterSceneRadio->AutoSize = true;
 			this->WaterSceneRadio->Location = System::Drawing::Point(37, 519);
-			this->WaterSceneRadio->Name = L"WaterSceneRadio";
+		 this->WaterSceneRadio->Name = L"WaterSceneRadio";
 			this->WaterSceneRadio->Size = System::Drawing::Size(127, 24);
 			this->WaterSceneRadio->TabIndex = 2;
 			this->WaterSceneRadio->TabStop = true;
@@ -253,7 +273,7 @@ namespace OpenGL {
 			// SpecularColorG
 			// 
 			this->SpecularColorG->Location = System::Drawing::Point(175, 235);
-			this->SpecularColorG->Maximum = 300;
+		 this->SpecularColorG->Maximum = 300;
 			this->SpecularColorG->Name = L"SpecularColorG";
 			this->SpecularColorG->Size = System::Drawing::Size(250, 69);
 			this->SpecularColorG->TabIndex = 8;
@@ -450,20 +470,20 @@ namespace OpenGL {
 			// 
 			this->label5->AutoSize = true;
 			this->label5->Location = System::Drawing::Point(67, 562);
-			this->label5->Name = L"label5";
-			this->label5->Size = System::Drawing::Size(84, 20);
-			this->label5->TabIndex = 29;
-			this->label5->Text = L"Frequency";
-			// 
+		 this->label5->Name = L"label5";
+		 this->label5->Size = System::Drawing::Size(84, 20);
+		 this->label5->TabIndex = 29;
+		 this->label5->Text = L"Frequency";
+		 // 
 			// label6
 			// 
 			this->label6->AutoSize = true;
 			this->label6->Location = System::Drawing::Point(71, 609);
-			this->label6->Name = L"label6";
-			this->label6->Size = System::Drawing::Size(80, 20);
-			this->label6->TabIndex = 30;
-			this->label6->Text = L"Amplitude";
-			// 
+		 this->label6->Name = L"label6";
+		 this->label6->Size = System::Drawing::Size(80, 20);
+		 this->label6->TabIndex = 30;
+		 this->label6->Text = L"Amplitude";
+		 // 
 			// ToolWindow
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(9, 20);
@@ -525,20 +545,29 @@ namespace OpenGL {
 	//	RenderBlueChannel = checkBoxBlueChannel->Checked;
 	//}
 private: System::Void SpecularStrength_Scroll(System::Object^ sender, System::EventArgs^ e) {
+	this->SpecularStrengthVal->Text = System::Convert::ToString(this->SpecularStrength->Value);
 }
 private: System::Void SpecularColorR_Scroll(System::Object^ sender, System::EventArgs^ e) {
+	double val = (double)this->SpecularColorR->Value / 100.0;
+	this->ColorRVal->Text = System::String::Format("{0:F2}", val);
 }
 private: System::Void SpecularColorG_Scroll(System::Object^ sender, System::EventArgs^ e) {
+	double val = (double)this->SpecularColorG->Value / 100.0;
+	this->ColorGVal->Text = System::String::Format("{0:F2}", val);
 }
 private: System::Void SpecularColorB_Scroll(System::Object^ sender, System::EventArgs^ e) {
+	double val = (double)this->SpecularColorB->Value / 100.0;
+	this->ColorBVal->Text = System::String::Format("{0:F2}", val);
 }
 private: System::Void ResetLightPosButton_Click(System::Object^ sender, System::EventArgs^ e) {
+	this->m_resetLightPosPressed = true;
 }
 private: System::Void MoveLightRadio_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 }
 private: System::Void TransformRadio_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 }
 private: System::Void ResetTransformButton_Click(System::Object^ sender, System::EventArgs^ e) {
+	this->m_resetTransformPressed = true;
 }
 private: System::Void TranslateCheckbox_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 }
@@ -547,10 +576,14 @@ private: System::Void RotateCheckbox_CheckedChanged(System::Object^ sender, Syst
 private: System::Void ScaleCheckbox_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 }
 private: System::Void Frequency_Scroll(System::Object^ sender, System::EventArgs^ e) {
+	double val = (double)this->Frequency->Value / 100.0;
+	this->FrequencyVal->Text = System::String::Format("{0:F2}", val);
 }
 private: System::Void WaterSceneRadio_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 }
 private: System::Void Amplitude_Scroll(System::Object^ sender, System::EventArgs^ e) {
+	double val = (double)this->Amplitude->Value / 100.0;
+	this->AmplitudeVal->Text = System::String::Format("{0:F2}", val);
 }
 private: System::Void WireframeRenderCheckbox_CheckedChanged(System::Object^ sender, System::EventArgs^ e) {
 }

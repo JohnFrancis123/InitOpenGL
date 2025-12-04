@@ -32,6 +32,27 @@ private:
 	Mesh m_meshLight;
 	Skybox m_skybox;
 	GLuint vao;
+
+	// Stored tool window values
+	bool m_moveLight = false;
+	bool m_transform = false;
+	bool m_waterScene = false;
+	bool m_spaceScene = false;
+	bool m_resetLightPosPressed = false;
+	bool m_resetTransformPressed = false;
+
+	int m_specularStrength = 0;
+	float m_specularColorR = 1.0f;
+	float m_specularColorG = 1.0f;
+	float m_specularColorB = 1.0f;
+	float m_frequency = 0.0f;
+	float m_amplitude = 0.0f;
+
+	bool m_translateEnabled = false;
+	bool m_rotateEnabled = false;
+	bool m_scaleEnabled = false;
+	bool m_wireframeEnabled = false;
+	bool m_tintBlueEnabled = false;
 };
 
 #endif // GAME_CONTROLLER_H

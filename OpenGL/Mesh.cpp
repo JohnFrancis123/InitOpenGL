@@ -24,7 +24,9 @@ Mesh::Mesh() {
 Mesh::~Mesh() {
 }
 
-
+void Mesh::SetRotation(glm::vec3 _rotation) {
+	m_rotation = _rotation;
+}
 
 void Mesh::Cleanup() {
 	//glDeleteBuffers(1, &m_indexBuffer);
@@ -148,7 +150,7 @@ void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 		for (unsigned int i = 0; i < m_instanceCount; i++) {
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(-20 + rand() % 40, -10 + rand() % 20, -10 + rand() % 20));
-			
+
 			for(int x = 0; x < 4; x++) {
 				for (int y = 0; y < 4; y++) {
 					m_instanceData.push_back(model[x][y]);

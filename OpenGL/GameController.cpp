@@ -63,27 +63,27 @@ void GameController::RunGame() {
 #pragma region CreateMeshes
 	// Create meshes
 	Mesh m = Mesh();
-	m.Create(&m_shaderColor, "../Assets/Models/teapot.obj");
+	m.Create(&m_shaderColor, "../Assets/Models/Sphere.obj");
 	m.SetPosition({ 0.0f, 0.8f, 1.0f });
 	m.SetColor({ 1.0f, 1.0f, 1.0f });
 	m.SetScale({ 0.01f, 0.01f, 0.01f });
 	Mesh::Lights.push_back(m);
 
 	//for (int i = 0; i < 1000; i++) {
-	Mesh box = Mesh();
-	box.Create(&m_shaderDiffuse, "../Assets/Models/Cube.obj", 10);
-	box.SetCameraPosition(m_camera.GetPosition());
-	box.SetScale({ 0.1f, 0.1f, 0.1f });
-	box.SetPosition({ 0.0f, 0.0f, 0.0f });
-	m_meshes.push_back(box);
+		Mesh asteroid = Mesh();
+		asteroid.Create(&m_shaderDiffuse, "../Assets/Models/asteroid.obj", 100);
+		asteroid.SetCameraPosition(m_camera.GetPosition());
+		asteroid.SetScale({ 0.1f, 0.1f, 0.1f });
+		asteroid.SetPosition({ 0.0f, 0.0f, 0.0f });
+		m_meshes.push_back(asteroid);
 	//}
 
-	//Mesh fighter = Mesh();
-	//fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");
-	//fighter.SetCameraPosition(m_camera.GetPosition());
-	//fighter.SetScale({ 0.002f, 0.002f, 0.002f });
-	//fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
-	//m_meshes.push_back(fighter);
+	Mesh fighter = Mesh();
+	fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");
+	fighter.SetCameraPosition(m_camera.GetPosition());
+	fighter.SetScale({ 0.0008f, 0.0008f, 0.0008f });
+	fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
+	m_meshes.push_back(fighter);
 
 	//Mesh wall = Mesh();
 	//wall.Create(&m_shaderDiffuse, "../Assets/Models/Wall.obj");
@@ -107,6 +107,29 @@ void GameController::RunGame() {
 
 	do
 	{
+		//updating stored tool window values
+		m_moveLight = window->GetMoveLightValue();
+		m_transform = window->GetTransformValue();
+		m_waterScene = window->GetWaterSceneValue();
+		m_spaceScene = window->GetSpaceSceneValue();
+
+		//resetting flags (once pressed they remain true; storing as is)
+		m_resetLightPosPressed = window->GetResetLightPosPressed();
+		m_resetTransformPressed = window->GetResetTransformPressed();
+
+		m_specularStrength = window->GetSpecularStrength();
+		m_specularColorR = (float)(window->GetSpecularColorR());
+		m_specularColorG = (float)(window->GetSpecularColorG());
+		m_specularColorB = (float)(window->GetSpecularColorB());
+		m_frequency = (float)(window->GetFrequency());
+		m_amplitude = (float)(window->GetAmplitude());
+
+		m_translateEnabled = window->GetTranslateEnabled();
+		m_rotateEnabled = window->GetRotateEnabled();
+		m_scaleEnabled = window->GetScaleEnabled();
+		m_wireframeEnabled = window->GetWireframeEnabled();
+		m_tintBlueEnabled = window->GetTintBlueEnabled();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
 
 		m_postProcessor.Start();

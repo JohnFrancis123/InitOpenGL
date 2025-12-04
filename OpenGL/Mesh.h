@@ -23,6 +23,7 @@ public:
 	void SetLightPosition(glm::vec3 _lightPosition) { m_lightPosition = _lightPosition; }
 	void SetLightColor(glm::vec3 _lightcolor) { m_lightColor = _lightcolor; }
 	void SetCameraPosition(glm::vec3 _cameraPosition) { m_cameraPosition = _cameraPosition; }
+	void SetRotation(glm::vec3 _rotation); //simple setter for rotation
 
 	// Methods
 	void Create(Shader* _shader, string _file, int _instanceCount = 1);
