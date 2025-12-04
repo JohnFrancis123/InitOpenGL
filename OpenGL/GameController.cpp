@@ -171,19 +171,27 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 
 	// Render after applying transforms
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+
+	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
+		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
+	}
 }
 
 
 void GameController::UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+
+
 }
 
 
 void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	m_camera.Rotate();
 	
-	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
-		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
+
+
+	for (unsigned int count = 0; count < m_meshes.size(); count++) {
+		m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 	}
 
 	// dont forget to render skybox
@@ -252,10 +260,10 @@ void GameController::RunGame() {
 	//m_meshes.push_back(fighter);
 
 	Mesh fish = Mesh();
-	fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");
-	fighter.SetCameraPosition(m_camera.GetPosition());
-	fighter.SetScale({ 0.0008f, 0.0008f, 0.0008f });
-	fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
+	fish.Create(&m_shaderDiffuse, "../Assets/Models/Fish.obj");
+	fish.SetCameraPosition(m_camera.GetPosition());
+	fish.SetScale({ 0.02f, 0.02f, 0.02f });
+	fish.SetPosition({ 0.0f, 0.0f, 0.0f });
 
 
 #pragma endregion CreateMeshes
@@ -334,9 +342,6 @@ void GameController::RunGame() {
 			m_postProcessor.Start();
 
 			glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
-			for (unsigned int count = 0; count < m_meshes.size(); count++) {
-				m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
-			}
 
 			//fighter.Render(m_camera.GetProjection() * m_camera.GetView());
 			
