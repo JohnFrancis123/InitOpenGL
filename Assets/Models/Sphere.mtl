@@ -12,5 +12,5 @@ newmtl 01___Default
 	Kd 0.5880 0.5880 0.5880
 	Ks 0.0000 0.0000 0.0000
 	Ke 0.0000 0.0000 0.0000
-	map_Ks C:\Users\johnF\source\repos\MultiRenders\Assets\Textures\TeapotSpecular.jpg
-	map_Kd C:\Users\johnF\source\repos\MultiRenders\Assets\Textures\Teapot.jpg
+	map_Ks C:\Users\johnF\source\repos\MultiRenders\Assets\Textures\Asteroid.jpg
+	map_Kd C:\Users\johnF\source\repos\MultiRenders\Assets\Textures\Asteroid.jpg

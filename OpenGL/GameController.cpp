@@ -41,6 +41,65 @@ void GameController::Initialize() {
 	m_camera = Camera(r);
 }
 
+// Helper to capture cursor vector relative to center (updates m_mouseClickDirection)
+void GameController::CaptureMouseClickDirection() {
+	GLFWwindow* window = WindowController::GetInstance().GetWindow();
+	if (!window) return;
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+
+	// Get window size and compute center
+	int width, height;
+	glfwGetWindowSize(window, &width, &height);
+	double centerX = width / 2.0;
+	double centerY = height / 2.0;
+
+	m_mouseClickDirection.x = static_cast<float>(xpos - centerX);
+	m_mouseClickDirection.y = static_cast<float>(centerY - ypos);
+}
+
+// Update state when left mouse is pressed
+void GameController::UpdateOnLeftMouse() {
+	GLFWwindow* window = WindowController::GetInstance().GetWindow();
+	if (!window) return;
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		m_leftMouseClicked = true;
+		CaptureMouseClickDirection();
+	}
+	else {
+		m_leftMouseClicked = false;
+	}
+}
+
+// Update state when middle mouse is pressed
+void GameController::UpdateOnMiddleMouse() {
+	GLFWwindow* window = WindowController::GetInstance().GetWindow();
+	if (!window) return;
+
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
+		m_middleMouseClicked = true;
+		CaptureMouseClickDirection();
+	}
+	else {
+		m_middleMouseClicked = false;
+	}
+}
+
+// Returns the last mouse-click direction vector relative to the center of the window (not normalized).
+glm::vec2 GameController::GetMouseClickDirection() {
+	// This function will update m_mouseClickDirection only while left mouse is currently pressed
+	GLFWwindow* window = WindowController::GetInstance().GetWindow();
+	if (!window) return m_mouseClickDirection;
+			
+	// Check left mouse button press
+	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+		CaptureMouseClickDirection();
+	}
+
+	return m_mouseClickDirection;
+}
+
 void GameController::RunGame() {
 
 	// Show the C++/CLI tool window
@@ -70,12 +129,12 @@ void GameController::RunGame() {
 	Mesh::Lights.push_back(m);
 
 	//for (int i = 0; i < 1000; i++) {
-		Mesh asteroid = Mesh();
-		asteroid.Create(&m_shaderDiffuse, "../Assets/Models/asteroid.obj", 100);
-		asteroid.SetCameraPosition(m_camera.GetPosition());
-		asteroid.SetScale({ 0.1f, 0.1f, 0.1f });
-		asteroid.SetPosition({ 0.0f, 0.0f, 0.0f });
-		m_meshes.push_back(asteroid);
+	Mesh asteroid = Mesh();
+	asteroid.Create(&m_shaderDiffuse, "../Assets/Models/asteroid.obj", 100);
+	asteroid.SetCameraPosition(m_camera.GetPosition());
+	asteroid.SetScale({ 0.1f, 0.1f, 0.1f });
+	asteroid.SetPosition({ 0.0f, 0.0f, 0.0f });
+	m_meshes.push_back(asteroid);
 	//}
 
 	Mesh fighter = Mesh();
@@ -83,7 +142,13 @@ void GameController::RunGame() {
 	fighter.SetCameraPosition(m_camera.GetPosition());
 	fighter.SetScale({ 0.0008f, 0.0008f, 0.0008f });
 	fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
-	m_meshes.push_back(fighter);
+	//m_meshes.push_back(fighter);
+
+	Mesh fish = Mesh();
+	fighter.Create(&m_shaderDiffuse, "../Assets/Models/Fighter.obj");
+	fighter.SetCameraPosition(m_camera.GetPosition());
+	fighter.SetScale({ 0.0008f, 0.0008f, 0.0008f });
+	fighter.SetPosition({ 0.0f, 0.0f, 0.0f });
 
 	//Mesh wall = Mesh();
 	//wall.Create(&m_shaderDiffuse, "../Assets/Models/Wall.obj");
@@ -104,6 +169,10 @@ void GameController::RunGame() {
 	double lastTime = glfwGetTime();
 	int fps = 0;
 	string fpsS = "0";
+
+	string modelStrPos = "";
+	string modelStrRot = "";
+	string modelStrScale = "";
 
 	do
 	{
@@ -130,6 +199,14 @@ void GameController::RunGame() {
 		m_wireframeEnabled = window->GetWireframeEnabled();
 		m_tintBlueEnabled = window->GetTintBlueEnabled();
 
+		// Update mouse button states and capture direction accordingly
+		UpdateOnLeftMouse();	
+		UpdateOnMiddleMouse();
+
+		modelStrPos = "";
+		modelStrRot = "";
+		modelStrScale = "";
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
 
 		m_postProcessor.Start();
@@ -138,6 +215,8 @@ void GameController::RunGame() {
 		for (unsigned int count = 0; count < m_meshes.size(); count++) {
 			m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
+
+		fighter.Render(m_camera.GetProjection() * m_camera.GetView());
 
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());

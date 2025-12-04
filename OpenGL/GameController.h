@@ -20,6 +20,16 @@ public:
 	//Methods
 	void Initialize();
 	void RunGame();
+
+	// Returns the last mouse-click direction (stored in m_mouseClickDirection). Calls will update this when a click occurs.
+	glm::vec2 GetMouseClickDirection();
+	// Simple getter to retrieve the stored mouse click direction without changing it
+	glm::vec2 GetStoredMouseClickVector() const		{ return m_mouseClickDirection; }
+
+	// Update functions for mouse buttons; call these from your update loop
+	void UpdateOnLeftMouse();
+	void UpdateOnMiddleMouse();
+
 private:
 	Shader m_shaderColor;
 	Shader m_shaderDiffuse;
@@ -53,6 +63,16 @@ private:
 	bool m_scaleEnabled = false;
 	bool m_wireframeEnabled = false;
 	bool m_tintBlueEnabled = false;
+
+	// Mouse click direction stored as vector relative to screen center (not normalized)
+	glm::vec2 m_mouseClickDirection = glm::vec2(0.0f, 0.0f);
+
+	// Mouse button state flags
+	bool m_leftMouseClicked = false;
+	bool m_middleMouseClicked = false;
+
+	// Helper to capture cursor vector relative to center
+	void CaptureMouseClickDirection();
 };
 
 #endif // GAME_CONTROLLER_H
