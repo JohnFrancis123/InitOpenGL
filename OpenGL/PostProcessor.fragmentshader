@@ -5,10 +5,12 @@ out vec4 FragColor;
 
 uniform sampler2D ScreenTexture;
 
-const float offset = 1.0 / 300.0;
-
 void main()
 {
+    // Temporarily disabling the edge-detection/post-processing and show the original render
+    /*
+const float offset = 1.0 / 300.0;
+
     vec2 offsets[9] = vec2[](
         vec2(-offset,  offset), // top-left
         vec2( 0.0f,    offset), // top-center
@@ -41,4 +43,8 @@ void main()
     }
 
     FragColor = vec4(col, 1.0);
+    */
+
+    // Normal output (no post-processing)
+    FragColor = texture(ScreenTexture, retTexCoord);
 }

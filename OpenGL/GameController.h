@@ -30,6 +30,13 @@ public:
 	void UpdateOnLeftMouse();
 	void UpdateOnMiddleMouse();
 
+	void UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
+	void UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
+	void UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
+	void UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
+
+	void MoveMeshWithMouse(Mesh& _mesh, float _sens);
+
 private:
 	Shader m_shaderColor;
 	Shader m_shaderDiffuse;
@@ -71,7 +78,14 @@ private:
 	bool m_leftMouseClicked = false;
 	bool m_middleMouseClicked = false;
 
+	bool m_currState[4];
+	bool m_changed = false;
+	// one-shot mode switch tracking
+	int m_prevMode = -1; // -1 = none, 0=moveLight,1=transform,2=water,3=space
+	bool m_modeSwitchTriggered = false;
 	// Helper to capture cursor vector relative to center
+
+	glm::vec3 m_specularColor;
 	void CaptureMouseClickDirection();
 };
 

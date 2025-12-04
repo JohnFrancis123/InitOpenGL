@@ -186,7 +186,10 @@ string Mesh::Concat(string _s1, int _index, string _s2) {
 
 void Mesh::CalculateTransform() {
 	m_world = glm::translate(glm::mat4(1.0f), m_position);
-	m_world = glm::rotate(m_world, glm::radians(m_rotation.x), glm::vec3(0, 1, 0));
+	// Apply rotations on X, Y, then Z so all rotation components are used
+	m_world = glm::rotate(m_world, glm::radians(m_rotation.x), glm::vec3(1, 0, 0));
+	m_world = glm::rotate(m_world, glm::radians(m_rotation.y), glm::vec3(0, 1, 0));
+	m_world = glm::rotate(m_world, glm::radians(m_rotation.z), glm::vec3(0, 0, 1));	
 	m_world = glm::scale(m_world, m_scale);
 }
 
@@ -206,7 +209,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 		m_shader->SetFloat(Concat("light[", i, "].linear").c_str(), 0.09f);
 		m_shader->SetFloat(Concat("light[", i, "].quadratic").c_str(), 0.032f);
 
-		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 1.0f, 1.0f, 1.0f });
+		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.5f, 0.5f, 0.5f });
 		m_shader->SetVec3(Concat("light[", i, "].diffuseColor").c_str(), Lights[i].GetColor());
 		m_shader->SetVec3(Concat("light[", i, "].specularColor").c_str(), { 3.0f, 3.0f, 3.0f });
 
@@ -220,6 +223,42 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 
 	// Configure Material
 	m_shader->SetFloat("material.specularStrength", 8);
+	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_textureDiffuse.GetTexture());
+	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_textureSpecular.GetTexture());
+	m_shader->SetTextureSampler("material.normalTexture", GL_TEXTURE2, 2, m_textureNormal.GetTexture());
+}
+
+// Final Exam
+void Mesh::SetShaderVariables(glm::mat4 _pv, int _specularStrength, glm::vec3 _specularColor) {
+	m_shader->SetMat4("World", m_world);
+	m_shader->SetMat4("WVP", _pv * m_world);
+	m_shader->SetVec3("CameraPosition", m_cameraPosition);
+	m_shader->SetInt("EnableNormalMap", m_enableNormalMap);
+	m_shader->SetInt("enableInstancing", m_enableInstancing);
+
+	// Configure Light
+	for (unsigned int i = 0; i < Lights.size(); i++)
+	{
+
+		//m_shader->SetVec3(Concat("light[", i, "].color").c_str(), m_lightColor);
+		m_shader->SetFloat(Concat("light[", i, "].constant").c_str(), 1.0f);
+		m_shader->SetFloat(Concat("light[", i, "].linear").c_str(), 0.09f);
+		m_shader->SetFloat(Concat("light[", i, "].quadratic").c_str(), 0.032f);
+
+		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.5f, 0.5f, 0.5f });
+		m_shader->SetVec3(Concat("light[", i, "].diffuseColor").c_str(), Lights[i].GetColor());
+		m_shader->SetVec3(Concat("light[", i, "].specularColor").c_str(), _specularColor);
+
+		m_shader->SetVec3(Concat("light[", i, "].position").c_str(), Lights[i].GetPosition());
+
+		m_shader->SetVec3(Concat("light[", i, "].direction").c_str(), glm::normalize(glm::vec3({ 0.0f + i * 0.1f, 0, 0.0f + i * 0.1f }) - Lights[i].GetPosition()));
+		m_shader->SetFloat(Concat("light[", i, "].coneAngle").c_str(), glm::radians(5.0f));
+		m_shader->SetFloat(Concat("light[", i, "].falloff").c_str(), 200);
+	}
+
+
+	// Configure Material
+	m_shader->SetFloat("material.specularStrength", _specularStrength);
 	m_shader->SetTextureSampler("material.diffuseTexture", GL_TEXTURE0, 0, m_textureDiffuse.GetTexture());
 	m_shader->SetTextureSampler("material.specularTexture", GL_TEXTURE1, 1, m_textureSpecular.GetTexture());
 	m_shader->SetTextureSampler("material.normalTexture", GL_TEXTURE2, 2, m_textureNormal.GetTexture());
@@ -337,10 +376,42 @@ void Mesh::BindAttributes() {
 void Mesh::Render(glm::mat4 _pv) {
 	glUseProgram(m_shader->GetProgramID()); // Use our shader
 
-	m_rotation.x += 0.01f;
+	//m_rotation.x += 0.01f;
 
 	CalculateTransform();
 	SetShaderVariables(_pv);
+	BindAttributes();
+	if (m_enableInstancing) {
+		glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize, m_instanceCount);
+	}
+	else {
+		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
+	}
+	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
+	// disable tangent attributes only if they were enabled
+
+	glDisableVertexAttribArray(m_shader->GetAttrNormals());
+	glDisableVertexAttribArray(m_shader->GetAttrVertices());
+	glDisableVertexAttribArray(m_shader->GetAttrTexCoords());
+	if (m_enableNormalMap) {
+		glDisableVertexAttribArray(m_shader->GetAttrTangents());
+		glDisableVertexAttribArray(m_shader->GetAttrBitangents());
+	}
+	if (m_enableInstancing) {
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix());
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 1);
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 2);
+		glDisableVertexAttribArray(m_shader->GetAttrInstanceMatrix() + 3);
+	}
+}
+
+void Mesh::Render(glm::mat4 _pv, int _specularStrength, glm::vec3 _specularColor) {
+	glUseProgram(m_shader->GetProgramID()); // Use our shader
+
+	//m_rotation.x += 0.01f;
+
+	CalculateTransform();
+	SetShaderVariables(_pv, _specularStrength, _specularColor);
 	BindAttributes();
 	if (m_enableInstancing) {
 		glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize, m_instanceCount);

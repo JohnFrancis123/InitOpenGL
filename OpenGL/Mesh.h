@@ -18,12 +18,14 @@ public:
 	void SetPosition(glm::vec3 _position) { m_position = _position; }
 	glm::vec3 GetPosition() { return  m_position; }
 	void SetScale(glm::vec3 _scale) { m_scale = _scale; }
+	glm::vec3 GetScale() { return m_scale; }
 	void SetColor(glm::vec3 _color) { m_color = _color; }
 	glm::vec3 GetColor() { return m_color; }
 	void SetLightPosition(glm::vec3 _lightPosition) { m_lightPosition = _lightPosition; }
 	void SetLightColor(glm::vec3 _lightcolor) { m_lightColor = _lightcolor; }
 	void SetCameraPosition(glm::vec3 _cameraPosition) { m_cameraPosition = _cameraPosition; }
 	void SetRotation(glm::vec3 _rotation); //simple setter for rotation
+	glm::vec3 GetRotation() { return m_rotation; }
 
 	// Methods
 	void Create(Shader* _shader, string _file, int _instanceCount = 1);
@@ -31,12 +33,15 @@ public:
 	void CalculateTransform();
 	void Render();
 	void Render(glm::mat4 _wvp);
+	void Render(glm::mat4 _wvp, int _specularStrength, glm::vec3 _specularColor);
 
 	// Members
 	static vector<Mesh> Lights;
 private:
 	// Methods
 	void SetShaderVariables(glm::mat4 _pv);
+
+	void SetShaderVariables(glm::mat4 _pv, int _specularStrength, glm::vec3 _specularColor);
 	void BindAttributes();
 	string Concat(string _s1, int _index, string _s2);
 	string RemoveFolder(string _map);
