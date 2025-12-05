@@ -33,9 +33,11 @@ public:
 	void UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 	void UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 	void UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
-	void UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
+	void UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, Skybox& _skybox);
 
 	void MoveMeshWithMouse(Mesh& _mesh, float _sens);
+
+	void ResetPos(int _option, Mesh& _mesh); //Final Exam
 
 private:
 	Shader m_shaderColor;

@@ -14,6 +14,12 @@ GameController::GameController() {
 
 	m_specularColor = { 1.0f, 1.0f, 1.0f };
 	m_changed = false;
+
+	m_translateEnabled = false;
+	m_wireframeEnabled = false;
+	m_rotateEnabled = false;
+	m_scaleEnabled = false;
+
 }
 
 GameController::~GameController() {
@@ -108,6 +114,7 @@ void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 
 	MoveMeshWithMouse(Mesh::Lights[0], 0.00001f);
 
+	if (m_resetLightPosPressed) ResetPos(1, Mesh::Lights[0]);
 
 	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
@@ -117,6 +124,9 @@ void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 
 void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	// While in transform mode, apply mouse-driven transforms
+
+	if (m_resetLightPosPressed) ResetPos(2, _mesh);
+
 	glm::vec2 d = GetMouseClickDirection() * 0.01f;
 
 	// Sensitivities (kept small so it doesn't move too fast)
@@ -177,17 +187,38 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	}
 }
 
+void GameController::ResetPos(int _option, Mesh& _mesh) {
+	if (_option == 1) { //reset light pos
+		_mesh.SetPosition({ 0.0f, 0.3f, 0.5f });
+	}
+	if (_option == 2) { // reset transformation
+		_mesh.SetScale({ 0.0008f, 0.0008f, 0.0008f });
+		_mesh.SetPosition({ 0.0f, 0.0f, 0.0f });
+		_mesh.SetRotation({ 45.0f, 0.0f, 0.0f });
+	}
+}
 
 void GameController::UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
-	_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+	// Configure post-processor for this frame
+	m_postProcessor.SetFrequencyAmplitude(m_frequency, m_amplitude);
+	m_postProcessor.SetTime((float)glfwGetTime());
+	m_postProcessor.SetTintBlue(m_tintBlueEnabled);
 
+	// Render water mesh and lights
+	_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+	//for (unsigned int i = 0; i < Mesh::Lights.size(); ++i) {
+	//	Mesh::Lights[i].Render(m_camera.GetProjection() * m_camera.GetView());
+	//}
+
+	m_postProcessor.SetWireFrame(m_wireframeEnabled);
 
 }
 
 
-void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
+void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, Skybox& _skybox) {
 	m_camera.Rotate();
-	
+	glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
+	_skybox.Render(m_camera.GetProjection() * view);
 
 
 	for (unsigned int count = 0; count < m_meshes.size(); count++) {
@@ -231,9 +262,22 @@ void GameController::RunGame() {
 	m_shaderFont.LoadShaders("Font.vertexshader", "Font.fragmentshader");
 	m_shaderPost = Shader();
 	m_shaderPost.LoadShaders("PostProcessor.vertexshader", "PostProcessor.fragmentshader");
+
+	m_shaderSkybox = Shader();
+	m_shaderSkybox.LoadShaders("Skybox.vertexshader", "Skybox.fragmentshader");
 #pragma endregion SetupShaders
 
 #pragma region CreateMeshes
+	Skybox skybox = Skybox();
+	skybox.Create(&m_shaderSkybox, "../Assets/Models/Skybox.obj",
+		{ "../Assets/Textures/Skybox/right.jpg",
+		  "../Assets/Textures/Skybox/left.jpg",
+		  "../Assets/Textures/Skybox/top.jpg",
+		  "../Assets/Textures/Skybox/bottom.jpg",
+		  "../Assets/Textures/Skybox/front.jpg",
+		  "../Assets/Textures/Skybox/back.jpg" });
+
+
 	// Create meshes
 	Mesh m = Mesh();
 	m.Create(&m_shaderColor, "../Assets/Models/Sphere.obj");
@@ -312,6 +356,10 @@ void GameController::RunGame() {
 
 		m_specularColor = glm::vec3(specularColorR, specularColorG, specularColorB);
 
+		if (m_modeSwitchTriggered) {
+			ResetPos(2, fighter); // reset model transform on mode switch
+		}
+
 			// determine current mode index
 			int currentMode = -1;
 			if (m_moveLight) currentMode = 0;
@@ -339,6 +387,13 @@ void GameController::RunGame() {
 
 			CaptureMouseClickDirection();
 
+			// set tint only when in water scene and UI requests it
+			if (m_waterScene && m_tintBlueEnabled) {
+				m_postProcessor.SetTintBlue(true);
+			} else {
+				m_postProcessor.SetTintBlue(false);
+			}
+
 			m_postProcessor.Start();
 
 			glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
@@ -355,7 +410,7 @@ void GameController::RunGame() {
 				UpdateWaterScene(fish, win, f);
 			}
 			else if (m_spaceScene) {
-				UpdateSpaceScene(fighter, win, f);
+				UpdateSpaceScene(fighter, win, f, skybox);
 			}
 
 		double currentTime = glfwGetTime();
@@ -368,9 +423,23 @@ void GameController::RunGame() {
 
 		f.RenderText(fpsS, 100, 300, 0.5f, { 1.0f, 1.0f, 0.0f }); //font gets rendered IN the post processor for the final
 		
+		// update post-processor globals only when in water scene
+		if (m_waterScene) {
+			m_postProcessor.SetTime((float)glfwGetTime());
+			m_postProcessor.SetFrequencyAmplitude(m_frequency, m_amplitude);
+		} else {
+			// disable wave and tint outside water scene
+			m_postProcessor.SetFrequencyAmplitude(0.0f, 0.0f);
+			m_postProcessor.SetTime(0.0f);
+			m_postProcessor.SetTintBlue(false);
+		}
+
 		m_postProcessor.End();
 
+		// Ensure tint is cleared after rendering
+		m_postProcessor.SetTintBlue(false);
 		
+
 		//f.RenderText("HELLO", 100, 100, 0.5f, {1.0f, 1.0f, 0.0f});
 
 		//f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });

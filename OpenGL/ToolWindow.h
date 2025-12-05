@@ -24,8 +24,8 @@ namespace OpenGL {
 		bool GetTransformValue() { return TransformRadio->Checked; }
 		bool GetWaterSceneValue() { return WaterSceneRadio->Checked; }
 		bool GetSpaceSceneValue() { return SpaceSceneRadio->Checked; }
-		bool GetResetLightPosPressed() { return m_resetLightPosPressed; }
-		bool GetResetTransformPressed() { return m_resetTransformPressed; }
+		bool GetResetLightPosPressed() { bool v = m_resetLightPosPressed; m_resetLightPosPressed = false; return v; }
+		bool GetResetTransformPressed() { bool v = m_resetTransformPressed; m_resetTransformPressed = false; return v; }
 
 		int GetSpecularStrength() { return SpecularStrength->Value; }
 		double GetSpecularColorR() { return (double)SpecularColorR->Value / 100.0; }

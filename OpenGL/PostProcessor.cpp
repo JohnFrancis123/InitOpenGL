@@ -74,7 +74,7 @@ void PostProcessor::CreateVertices() {
 
 void PostProcessor::BindVertices() {
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer); // Bind the Vertex Buffer
-	
+
 	// 1st attribute buffer : vertices
 	glEnableVertexAttribArray(m_postShader->GetAttrVertices());
 	glVertexAttribPointer(m_postShader->GetAttrVertices(), //the attribute we want to configure
@@ -106,8 +106,24 @@ void PostProcessor::End() {
 
 	glUseProgram(m_postShader->GetProgramID()); // Use our shader
 	m_postShader->SetTextureSampler("ScreenTexture", GL_TEXTURE0, 0, m_textureColorBuffer);
+	//limiting frequency and amplitude to reasonable ranges
+	float scaledFreq = glm::clamp(m_frequency, 0.0f, 100.0f);
+	float scaledAmp = glm::clamp(m_amplitude, 0.0f, 0.40f); // max 5% displacement
+	m_postShader->SetFloat("frequency", scaledFreq);
+	m_postShader->SetFloat("amplitude", scaledAmp);
+	m_postShader->SetFloat("time", m_time);
+	m_postShader->SetInt("tintBlue", m_tintBlue ? 1 : 0);
+
+	// Bind and draw
 	BindVertices();
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // remove this when done output 2
+
+	if (m_wireFrame) {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
+	else {
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(m_postShader->GetAttrVertices());
 	glDisableVertexAttribArray(m_postShader->GetAttrTexCoords());
