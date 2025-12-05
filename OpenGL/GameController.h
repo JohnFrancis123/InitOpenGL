@@ -39,6 +39,8 @@ public:
 
 	void ResetPos(int _option, Mesh& _mesh); //Final Exam
 
+	string Vec3ToString(glm::vec3 _vec);
+
 private:
 	Shader m_shaderColor;
 	Shader m_shaderDiffuse;
@@ -73,6 +75,8 @@ private:
 	bool m_wireframeEnabled = false;
 	bool m_tintBlueEnabled = false;
 
+	string m_modelName;
+
 	// Mouse click direction stored as vector relative to screen center (not normalized)
 	glm::vec2 m_mouseClickDirection = glm::vec2(0.0f, 0.0f);
 
@@ -86,6 +90,8 @@ private:
 	int m_prevMode = -1; // -1 = none, 0=moveLight,1=transform,2=water,3=space
 	bool m_modeSwitchTriggered = false;
 	// Helper to capture cursor vector relative to center
+
+	Mesh* m_mesh;
 
 	glm::vec3 m_specularColor;
 	void CaptureMouseClickDirection();

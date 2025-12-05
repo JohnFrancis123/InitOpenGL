@@ -16,6 +16,7 @@ public:
 	glm::mat4 GetView() { return m_view; }
 	glm::vec3 GetPosition() { return m_position; }
 
+	void Reset();
 	// Methods
 	void Rotate();
 

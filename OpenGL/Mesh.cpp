@@ -9,6 +9,7 @@ Mesh::Mesh() {
 	m_textureSpecular = { };
 	m_textureDiffuse = { };
 	m_vertexBuffer = 0;
+	m_instanceBuffer = 0; // ensure instance buffer starts as 0
 	m_position = { 0, 0, 0 };
 	m_rotation = { 0, 0, 0 };
 	m_scale = { 1, 1, 1 };
@@ -31,6 +32,7 @@ void Mesh::SetRotation(glm::vec3 _rotation) {
 void Mesh::Cleanup() {
 	//glDeleteBuffers(1, &m_indexBuffer);
 	glDeleteBuffers(1, &m_vertexBuffer);
+	if (m_instanceBuffer != 0) { glDeleteBuffers(1, &m_instanceBuffer); m_instanceBuffer = 0; }
 	m_textureSpecular.Cleanup();
 	m_textureDiffuse.Cleanup();
 }
@@ -151,8 +153,8 @@ void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 			glm::mat4 model = glm::mat4(1.0f);
 			// pick a random direction and radius so instances originate at 0 and spread outward
 			glm::vec3 dir = glm::normalize(glm::vec3((rand() / (float)RAND_MAX) * 2.0f - 1.0f,
-													 (rand() / (float)RAND_MAX) * 2.0f - 1.0f,
-													 (rand() / (float)RAND_MAX) * 2.0f - 1.0f));
+								 (rand() / (float)RAND_MAX) * 2.0f - 1.0f,
+								 (rand() / (float)RAND_MAX) * 2.0f - 1.0f));
 			// reduce Y influence
 			dir.y *= 0.2f;
 			glm::vec3 dirNorm = glm::normalize(dir);
@@ -162,6 +164,13 @@ void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 
 			float radius = (rand() / (float)RAND_MAX) * 50.0f; // decent max spread
 			model = glm::translate(model, dir * radius);
+
+			// apply random orientation per instance (use single random axis + angle instead of three Euler rotations)
+			glm::vec3 randAxis = glm::normalize(glm::vec3((rand() / (float)RAND_MAX) * 2.0f - 1.0f,
+												 (rand() / (float)RAND_MAX) * 2.0f - 1.0f,
+												 (rand() / (float)RAND_MAX) * 2.0f - 1.0f));
+			float angle = (rand() / (float)RAND_MAX) * 360.0f;
+			model = glm::rotate(model, glm::radians(angle), randAxis);
 
 			// random uniform scale (minimal change)
 			float scale = 50 + rand() % 151; // scale percent 50..200
@@ -173,10 +182,10 @@ void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 				}
 			}
 		}
-	}
 
-	glBufferData(GL_ARRAY_BUFFER, m_instanceCount * sizeof(glm::mat4), m_instanceData.data(), GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBufferData(GL_ARRAY_BUFFER, m_instanceCount * sizeof(glm::mat4), m_instanceData.data(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
 }
 
 string Mesh::Concat(string _s1, int _index, string _s2) {
@@ -189,7 +198,7 @@ void Mesh::CalculateTransform() {
 	// Apply rotations on X, Y, then Z so all rotation components are used
 	m_world = glm::rotate(m_world, glm::radians(m_rotation.x), glm::vec3(1, 0, 0));
 	m_world = glm::rotate(m_world, glm::radians(m_rotation.y), glm::vec3(0, 1, 0));
-	m_world = glm::rotate(m_world, glm::radians(m_rotation.z), glm::vec3(0, 0, 1));	
+	m_world = glm::rotate(m_world, glm::radians(m_rotation.z), glm::vec3(0, 0, 1));
 	m_world = glm::scale(m_world, m_scale);
 }
 
@@ -209,7 +218,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv) {
 		m_shader->SetFloat(Concat("light[", i, "].linear").c_str(), 0.09f);
 		m_shader->SetFloat(Concat("light[", i, "].quadratic").c_str(), 0.032f);
 
-		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.5f, 0.5f, 0.5f });
+		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.0f, 0.0f, 0.0f });
 		m_shader->SetVec3(Concat("light[", i, "].diffuseColor").c_str(), Lights[i].GetColor());
 		m_shader->SetVec3(Concat("light[", i, "].specularColor").c_str(), { 3.0f, 3.0f, 3.0f });
 
@@ -245,7 +254,7 @@ void Mesh::SetShaderVariables(glm::mat4 _pv, int _specularStrength, glm::vec3 _s
 		m_shader->SetFloat(Concat("light[", i, "].linear").c_str(), 0.09f);
 		m_shader->SetFloat(Concat("light[", i, "].quadratic").c_str(), 0.032f);
 
-		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.5f, 0.5f, 0.5f });
+		m_shader->SetVec3(Concat("light[", i, "].ambientColor").c_str(), { 0.0f, 0.0f, 0.0f });
 		m_shader->SetVec3(Concat("light[", i, "].diffuseColor").c_str(), Lights[i].GetColor());
 		m_shader->SetVec3(Concat("light[", i, "].specularColor").c_str(), _specularColor);
 
@@ -277,7 +286,7 @@ void Mesh::BindAttributes() {
 #pragma region BindVertexData
 		// 1st attribute buffer : vertices
 		glEnableVertexAttribArray(m_shader->GetAttrVertices());
-		glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirbute we want to configure
+		glVertexAttribPointer(m_shader->GetAttrVertices(), // The attirerbute we want to configure
 			3, //size (3 vertices per primitive)
 			GL_FLOAT, // type
 			GL_FALSE, // normalized?
@@ -385,7 +394,7 @@ void Mesh::Render(glm::mat4 _pv) {
 		glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize, m_instanceCount);
 	}
 	else {
-		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
+		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize); // Draw the triangle
 	}
 	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
 	// disable tangent attributes only if they were enabled
@@ -417,7 +426,7 @@ void Mesh::Render(glm::mat4 _pv, int _specularStrength, glm::vec3 _specularColor
 		glDrawArraysInstanced(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize, m_instanceCount);
 	}
 	else {
-		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / 8); // Draw the triangle
+		glDrawArrays(GL_TRIANGLES, 0, m_vertexData.size() / m_elementSize); // Draw the triangle
 	}
 	//glDrawElements(GL_TRIANGLES, m_indexData.size(), GL_UNSIGNED_BYTE, (void*)0);
 	// disable tangent attributes only if they were enabled

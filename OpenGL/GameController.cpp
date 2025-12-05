@@ -19,7 +19,10 @@ GameController::GameController() {
 	m_wireframeEnabled = false;
 	m_rotateEnabled = false;
 	m_scaleEnabled = false;
+	
+	m_mesh = nullptr; //while this is not manually freed, it just points to a value on the stack so we don't really need to manually delete it.
 
+	m_modelName = "";
 }
 
 GameController::~GameController() {
@@ -69,6 +72,7 @@ void GameController::CaptureMouseClickDirection() {
 
 // Update state when left mouse is pressed
 void GameController::UpdateOnLeftMouse() {
+
 	GLFWwindow* window = WindowController::GetInstance().GetWindow();
 	if (!window) return;
 
@@ -110,6 +114,15 @@ glm::vec2 GameController::GetMouseClickDirection() {
 }
 
 void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
+	if(m_modeSwitchTriggered) {
+		ResetPos(2, _mesh);
+		m_modelName = "Fighter";
+	}
+
+	m_mesh = &_mesh;
+
+	_mesh.SetRotation(_mesh.GetRotation() + glm::vec3(0.2f, 0.0f, 0.0f));
+
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 
 	MoveMeshWithMouse(Mesh::Lights[0], 0.00001f);
@@ -121,12 +134,24 @@ void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	}
 }
 
+string GameController::Vec3ToString(glm::vec3 _vec) {
+	return "vec3(" + to_string(_vec.x) + ", " + to_string(_vec.y) + ", " + to_string(_vec.z) + ")";
+}
 
 void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
-		// While in transform mode, apply mouse-driven transforms
+		
+	if (m_modeSwitchTriggered) {
+		ResetPos(2, _mesh);
+		m_modelName = "Fighter";
+	}
 
-		if (m_resetTransformPressed) ResetPos(2, _mesh);
+	if(m_resetTransformPressed) {
+		ResetPos(2, _mesh);
+	}
 
+	m_mesh = &_mesh;
+
+	// While in transform mode, apply mouse-driven transforms
 		glm::vec2 d = GetMouseClickDirection() * 0.01f;
 
 		// Sensitivities (kept small so it doesn't move too fast)
@@ -180,7 +205,7 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 		}
 
 		// Render after applying transforms
-		_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+		_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 
 		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
@@ -189,7 +214,7 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 
 void GameController::ResetPos(int _option, Mesh& _mesh) {
 	if (_option == 1) { //reset light pos
-		_mesh.SetPosition({ 0.0f, 0.3f, 0.5f });
+		_mesh.SetPosition({ 0.0f, 0.3f, 1.0f });
 	}
 	if (_option == 2) { // reset transformation
 		_mesh.SetScale({ 0.0008f, 0.0008f, 0.0008f });
@@ -200,12 +225,18 @@ void GameController::ResetPos(int _option, Mesh& _mesh) {
 
 void GameController::UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	// Configure post-processor for this frame
+	if (m_modeSwitchTriggered) {
+		m_modelName = "Fish";
+	}
+
+	m_mesh = &_mesh;
+
 	m_postProcessor.SetFrequencyAmplitude(m_frequency, m_amplitude);
 	m_postProcessor.SetTime((float)glfwGetTime());
 	m_postProcessor.SetTintBlue(m_tintBlueEnabled);
 
 	// Render water mesh and lights
-	_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 	//for (unsigned int i = 0; i < Mesh::Lights.size(); ++i) {
 	//	Mesh::Lights[i].Render(m_camera.GetProjection() * m_camera.GetView());
 	//}
@@ -216,16 +247,22 @@ void GameController::UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) 
 
 
 void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, Skybox& _skybox) {
+	if (m_modeSwitchTriggered) {
+		_mesh.SetRotation({ 0.0f, 0.0f, 0.0f });
+		m_modelName = "Fighter";
+	}
+
+	m_mesh = &_mesh;
+
 	m_camera.Rotate();
 	glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
 	_skybox.Render(m_camera.GetProjection() * view);
 
-
 	for (unsigned int count = 0; count < m_meshes.size(); count++) {
-		m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView());
+		m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 	}
 
-	// dont forget to render skybox
+	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 }
 
 void GameController::MoveMeshWithMouse(Mesh& _mesh, float _sens) {
@@ -246,7 +283,6 @@ void GameController::MoveMeshWithMouse(Mesh& _mesh, float _sens) {
 }
 
 void GameController::RunGame() {
-
 	// Show the C++/CLI tool window
 	OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
 	window->Show();
@@ -281,9 +317,9 @@ void GameController::RunGame() {
 	// Create meshes
 	Mesh m = Mesh();
 	m.Create(&m_shaderColor, "../Assets/Models/Sphere.obj");
-	m.SetPosition({ 0.0f, 0.3f, 0.5f });
+	m.SetPosition({ 0.0f, 0.3f, 1.0f });
 	m.SetColor({ 1.0f, 1.0f, 1.0f });
-	m.SetScale({ 0.01f, 0.01f, 0.01f });
+	m.SetScale({ 0.0025f, 0.0025f, 0.0f });
 	Mesh::Lights.push_back(m);
 
 	//for (int i = 0; i < 1000; i++) {
@@ -323,7 +359,11 @@ void GameController::RunGame() {
 	int fps = 0;
 	string fpsS = "0";
 
+	m_modelName = "Fighter";
+
 	string modelStrPos = "";
+	string leftBtnStr = "";
+	string middleBtnStr = "";
 	string modelStrRot = "";
 	string modelStrScale = "";
 
@@ -356,9 +396,7 @@ void GameController::RunGame() {
 
 		m_specularColor = glm::vec3(specularColorR, specularColorG, specularColorB);
 
-		if (m_modeSwitchTriggered) {
-			ResetPos(2, fighter); // reset model transform on mode switch
-		}
+
 
 			// determine current mode index
 			int currentMode = -1;
@@ -413,6 +451,10 @@ void GameController::RunGame() {
 				UpdateSpaceScene(fighter, win, f, skybox);
 			}
 
+			if (m_modeSwitchTriggered) {
+				m_camera.Reset();
+			}
+
 		double currentTime = glfwGetTime();
 		fps++;
 		if (currentTime - lastTime >= 1.0) {
@@ -420,9 +462,30 @@ void GameController::RunGame() {
 			fps = 0;
 			lastTime = currentTime;
 		}
+		
+		// build model info strings safely
+		if (m_mesh) {
+			modelStrPos = m_modelName + " Position: " + Vec3ToString(m_mesh->GetPosition());
+			modelStrRot = m_modelName + " Rotation: " + Vec3ToString(m_mesh->GetRotation());
+			modelStrScale = m_modelName + " Scale: " + Vec3ToString(m_mesh->GetScale());
+		} else {
+			modelStrPos = m_modelName + " Position: (none)";
+			modelStrRot = m_modelName + " Rotation: (none)";
+			modelStrScale = m_modelName + " Scale: (none)";
+		}
+
+		leftBtnStr = "Left Mouse Button: " + string(m_leftMouseClicked ? "Down" : "Up");
+		middleBtnStr = "Middle Mouse Button: " + string(m_middleMouseClicked ? "Down" : "Up");
+
 
 		f.RenderText(fpsS, 100, 300, 0.5f, { 1.0f, 1.0f, 0.0f }); //font gets rendered IN the post processor for the final
 		
+		f.RenderText(modelStrPos, 100, 330, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(leftBtnStr, 100, 360, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(middleBtnStr, 100, 390, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(modelStrRot, 100, 420, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(modelStrScale, 100, 450, 0.5f, { 1.0f, 1.0f, 0.0f });
+
 		// update post-processor globals only when in water scene
 		if (m_waterScene) {
 			m_postProcessor.SetTime((float)glfwGetTime());
