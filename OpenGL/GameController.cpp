@@ -123,68 +123,68 @@ void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 
 
 void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
-	// While in transform mode, apply mouse-driven transforms
+		// While in transform mode, apply mouse-driven transforms
 
-	if (m_resetLightPosPressed) ResetPos(2, _mesh);
+		if (m_resetTransformPressed) ResetPos(2, _mesh);
 
-	glm::vec2 d = GetMouseClickDirection() * 0.01f;
+		glm::vec2 d = GetMouseClickDirection() * 0.01f;
 
-	// Sensitivities (kept small so it doesn't move too fast)
-	const float transXY = 0.0025f;
-	const float rotXY = 0.05f;
-	const float scaleXY = 0.0015f;
-	const float transZ = 0.01f;
-	const float rotZ = 0.2f;
-	const float scaleZ = 0.000025f;
+		// Sensitivities (kept small so it doesn't move too fast)
+		const float transXY = 0.0025f;
+		const float rotXY = 0.05f;
+		const float scaleXY = 0.0015f;
+		const float transZ = 0.01f;
+		const float rotZ = 0.2f;
+		const float scaleZ = 0.000025f;
 
-	// Left mouse: XY translation/rotation/scale
-	if (m_leftMouseClicked) {
-		if (m_translateEnabled) {
-			glm::vec3 p = _mesh.GetPosition();
-			p.x += d.x * transXY;
-			p.y += d.y * transXY;
-			_mesh.SetPosition(p);
+		// Left mouse: XY translation/rotation/scale
+		if (m_leftMouseClicked) {
+			if (m_translateEnabled) {
+				glm::vec3 p = _mesh.GetPosition();
+				p.x += d.x * transXY;
+				p.y += d.y * transXY;
+				_mesh.SetPosition(p);
+			}
+			if (m_rotateEnabled) {
+				glm::vec3 r = _mesh.GetRotation();
+				r.x += d.y * rotXY;
+				r.z += d.x * rotXY;
+				_mesh.SetRotation(r);
+			}
+			if (m_scaleEnabled) {
+				glm::vec3 s3 = _mesh.GetScale();
+				s3.x += d.x * scaleXY * 0.001f; // scale X by mouse X
+				s3.y += d.y * scaleXY * 0.001f; // scale Y by mouse Y
+				_mesh.SetScale(s3);
+			}
 		}
-		if (m_rotateEnabled) {
-			glm::vec3 r = _mesh.GetRotation();
-			r.x += d.y * rotXY;
-			r.z += d.x * rotXY;
-			_mesh.SetRotation(r);
-		}
-		if (m_scaleEnabled) {
-			glm::vec3 s3 = _mesh.GetScale();
-			s3.x += d.x * scaleXY * 0.001f; // scale X by mouse X
-			s3.y += d.y * scaleXY * 0.001f; // scale Y by mouse Y
-			_mesh.SetScale(s3);
-		}
-	}
 
-	// Middle mouse: Z translation/rotation/scale (based on Y movement)
-	if (m_middleMouseClicked) {
-		if (m_translateEnabled) {
-			glm::vec3 p = _mesh.GetPosition();
-			p.z += d.y * transZ; // move along Z from Y
-			_mesh.SetPosition(p);
-		} //
-		if (m_rotateEnabled) {
-			glm::vec3 r = _mesh.GetRotation();
-			r.y += d.x * rotZ;
-			r.x += d.y * rotZ;
-			_mesh.SetRotation(r);
+		// Middle mouse: Z translation/rotation/scale (based on Y movement)
+		if (m_middleMouseClicked) {
+			if (m_translateEnabled) {
+				glm::vec3 p = _mesh.GetPosition();
+				p.z += d.y * transZ; // move along Z from Y
+				_mesh.SetPosition(p);
+			} //
+			if (m_rotateEnabled) {
+				glm::vec3 r = _mesh.GetRotation();
+				r.y += d.x * rotZ;
+				r.x += d.y * rotZ;
+				_mesh.SetRotation(r);
+			}
+			if (m_scaleEnabled) {
+				glm::vec3 s3 = _mesh.GetScale();
+				s3.z += d.y * scaleZ * 0.01f; // scale Z by mouse Y
+				_mesh.SetScale(s3);
+			}
 		}
-		if (m_scaleEnabled) {
-			glm::vec3 s3 = _mesh.GetScale();
-			s3.z += d.y * scaleZ * 0.01f; // scale Z by mouse Y
-			_mesh.SetScale(s3);
+
+		// Render after applying transforms
+		_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
+
+		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
+			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 		}
-	}
-
-	// Render after applying transforms
-	_mesh.Render(m_camera.GetProjection() * m_camera.GetView());
-
-	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
-		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
-	}
 }
 
 void GameController::ResetPos(int _option, Mesh& _mesh) {
