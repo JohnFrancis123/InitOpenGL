@@ -70,33 +70,27 @@ void GameController::CaptureMouseClickDirection() {
 	m_mouseClickDirection.y = static_cast<float>(centerY - ypos);
 }
 
-// Update state when left mouse is pressed
-void GameController::UpdateOnLeftMouse() {
-
+// Consolidated helper to update button state and capture direction
+void GameController::UpdateBtnState(int _glfwButton, bool& _stateFlag) {
 	GLFWwindow* window = WindowController::GetInstance().GetWindow();
 	if (!window) return;
 
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
-		m_leftMouseClicked = true;
-		//CaptureMouseClickDirection();
+	if (glfwGetMouseButton(window, _glfwButton) == GLFW_PRESS) {
+		_stateFlag = true;
+		CaptureMouseClickDirection();
+	} else {
+		_stateFlag = false;
 	}
-	else {
-		m_leftMouseClicked = false;
-	}
+}
+
+// Update state when left mouse is pressed
+void GameController::UpdateOnLeftMouse() {
+	UpdateBtnState(GLFW_MOUSE_BUTTON_LEFT, m_leftMouseClicked);
 }
 
 // Update state when middle mouse is pressed
 void GameController::UpdateOnMiddleMouse() {
-	GLFWwindow* window = WindowController::GetInstance().GetWindow();
-	if (!window) return;
-
-	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS) {
-		m_middleMouseClicked = true;
-		//CaptureMouseClickDirection();
-	}
-	else {
-		m_middleMouseClicked = false;
-	}
+	UpdateBtnState(GLFW_MOUSE_BUTTON_MIDDLE, m_middleMouseClicked);
 }
 
 // Returns the last mouse-click direction vector relative to the center of the window (not normalized).
@@ -113,21 +107,96 @@ glm::vec2 GameController::GetMouseClickDirection() {
 	return m_mouseClickDirection;
 }
 
-void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
-	if(m_modeSwitchTriggered) {
+// Helper to prepare mesh when mode switches or reset requested
+void GameController::PrepMesh(Mesh& _mesh, const std::string& _defaultName, bool _resetRequested) {
+	if (m_modeSwitchTriggered) {
 		ResetPos(2, _mesh);
-		m_modelName = "Fighter";
+		m_modelName = _defaultName;
+	}
+	if (_resetRequested) {
+		ResetPos(2, _mesh);
+	}
+	m_mesh = &_mesh;
+}
+
+// New unified transform applier
+void GameController::ApplyXforms(Mesh& _mesh, bool isMoveLight) {
+	glm::vec2 d = GetMouseClickDirection() * 0.01f;
+
+	// Sensitivities
+	const float transXY = 0.0025f;
+	const float rotXY = 0.05f;
+	const float scaleXY = 0.0015f;
+	const float transZ = 0.01f;
+	const float rotZ = 0.2f;
+	const float scaleZ = 0.000025f;
+
+	// If caller is MoveLight, only allow position changes
+	if (isMoveLight) {
+		if (m_leftMouseClicked && m_translateEnabled) {
+			glm::vec3 p = _mesh.GetPosition();
+			p.x += d.x * transXY;
+			p.y += d.y * transXY;
+			_mesh.SetPosition(p);
+		}
+		if (m_middleMouseClicked && m_translateEnabled) {
+			glm::vec3 p = _mesh.GetPosition();
+			p.z += d.y * transZ;
+			_mesh.SetPosition(p);
+		}
+		return;
 	}
 
-	m_mesh = &_mesh;
+	// Full transform allowed for general models
+	if (m_leftMouseClicked) {
+		if (m_translateEnabled) {
+			glm::vec3 p = _mesh.GetPosition();
+			p.x += d.x * transXY;
+			p.y += d.y * transXY;
+			_mesh.SetPosition(p);
+		}
+		if (m_rotateEnabled) {
+			glm::vec3 r = _mesh.GetRotation();
+			r.x += d.y * rotXY;
+			r.z += d.x * rotXY;
+			_mesh.SetRotation(r);
+		}
+		if (m_scaleEnabled) {
+			glm::vec3 s3 = _mesh.GetScale();
+			s3.x += d.x * scaleXY * 0.001f;
+			s3.y += d.y * scaleXY * 0.001f;
+			_mesh.SetScale(s3);
+		}
+	}
 
-	_mesh.SetRotation(_mesh.GetRotation() + glm::vec3(0.2f, 0.0f, 0.0f));
+	if (m_middleMouseClicked) {
+		if (m_translateEnabled) {
+			glm::vec3 p = _mesh.GetPosition();
+			p.z += d.y * transZ;
+			_mesh.SetPosition(p);
+		}
+		if (m_rotateEnabled) {
+			glm::vec3 r = _mesh.GetRotation();
+			r.y += d.x * rotZ;
+			r.x += d.y * rotZ;
+			_mesh.SetRotation(r);
+		}
+		if (m_scaleEnabled) {
+			glm::vec3 s3 = _mesh.GetScale();
+			s3.z += d.y * scaleZ * 0.01f;
+			_mesh.SetScale(s3);
+		}
+	}
+}
+
+void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
+	PrepMesh(_mesh, "Fighter", m_resetLightPosPressed);
+
+	ApplyXforms(_mesh, true);
 
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 
 	MoveMeshWithMouse(Mesh::Lights[0], 0.00001f);
-
-	if (m_resetLightPosPressed) ResetPos(1, Mesh::Lights[0]);
 
 	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
@@ -139,77 +208,16 @@ string GameController::Vec3ToString(glm::vec3 _vec) {
 }
 
 void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
-		
-	if (m_modeSwitchTriggered) {
-		ResetPos(2, _mesh);
-		m_modelName = "Fighter";
+	PrepMesh(_mesh, "Fighter", m_resetTransformPressed);
+
+	ApplyXforms(_mesh, false);
+
+	// Render after applying transforms
+	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
+
+	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
+		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 	}
-
-	if(m_resetTransformPressed) {
-		ResetPos(2, _mesh);
-	}
-	 //
-	m_mesh = &_mesh;
-
-	// While in transform mode, apply mouse-driven transforms
-		glm::vec2 d = GetMouseClickDirection() * 0.01f;
-
-		// Sensitivities (kept small so it doesn't move too fast)
-		const float transXY = 0.0025f;
-		const float rotXY = 0.05f;
-		const float scaleXY = 0.0015f;
-		const float transZ = 0.01f;
-		const float rotZ = 0.2f;
-		const float scaleZ = 0.000025f;
-
-		// Left mouse: XY translation/rotation/scale
-		if (m_leftMouseClicked) {
-			if (m_translateEnabled) {
-				glm::vec3 p = _mesh.GetPosition();
-				p.x += d.x * transXY;
-				p.y += d.y * transXY;
-				_mesh.SetPosition(p);
-			}
-			if (m_rotateEnabled) {
-				glm::vec3 r = _mesh.GetRotation();
-				r.x += d.y * rotXY;
-				r.z += d.x * rotXY;
-				_mesh.SetRotation(r);
-			}
-			if (m_scaleEnabled) {
-				glm::vec3 s3 = _mesh.GetScale();
-				s3.x += d.x * scaleXY * 0.001f; // scale X by mouse X
-				s3.y += d.y * scaleXY * 0.001f; // scale Y by mouse Y
-				_mesh.SetScale(s3);
-			}
-		}
-
-		// Middle mouse: Z translation/rotation/scale (based on Y movement)
-		if (m_middleMouseClicked) {
-			if (m_translateEnabled) {
-				glm::vec3 p = _mesh.GetPosition();
-				p.z += d.y * transZ; // move along Z from Y
-				_mesh.SetPosition(p);
-			} //
-			if (m_rotateEnabled) {
-				glm::vec3 r = _mesh.GetRotation();
-				r.y += d.x * rotZ;
-				r.x += d.y * rotZ;
-				_mesh.SetRotation(r);
-			}
-			if (m_scaleEnabled) {
-				glm::vec3 s3 = _mesh.GetScale();
-				s3.z += d.y * scaleZ * 0.01f; // scale Z by mouse Y
-				_mesh.SetScale(s3);
-			}
-		}
-
-		// Render after applying transforms
-		_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
-
-		for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
-			Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
-		}
 }
 
 void GameController::ResetPos(int _option, Mesh& _mesh) {
@@ -480,9 +488,9 @@ void GameController::RunGame() {
 
 		f.RenderText(fpsS, 100, 300, 0.5f, { 1.0f, 1.0f, 0.0f }); //font gets rendered IN the post processor for the final
 		
-		f.RenderText(modelStrPos, 100, 330, 0.5f, { 1.0f, 1.0f, 0.0f });
-		f.RenderText(leftBtnStr, 100, 360, 0.5f, { 1.0f, 1.0f, 0.0f });
-		f.RenderText(middleBtnStr, 100, 390, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(leftBtnStr, 100, 330, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(middleBtnStr, 100, 360, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(modelStrPos, 100, 390, 0.5f, { 1.0f, 1.0f, 0.0f });
 		f.RenderText(modelStrRot, 100, 420, 0.5f, { 1.0f, 1.0f, 0.0f });
 		f.RenderText(modelStrScale, 100, 450, 0.5f, { 1.0f, 1.0f, 0.0f });
 

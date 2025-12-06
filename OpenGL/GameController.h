@@ -95,6 +95,15 @@ private:
 
 	glm::vec3 m_specularColor;
 	void CaptureMouseClickDirection();
+
+	// Consolidated mouse helper to update button state and capture direction
+	void UpdateBtnState(int _glfwButton, bool& _stateFlag);
+
+	// Consolidated helper to prepare mesh when mode switches or reset requested
+	void PrepMesh(Mesh& _mesh, const std::string& _defaultName, bool _resetRequested);
+
+	// Consolidated mouse-driven transform applier (used by Transform and MoveLight)
+	void ApplyXforms(Mesh& _mesh, bool isMoveLight);
 };
 
 #endif // GAME_CONTROLLER_H
