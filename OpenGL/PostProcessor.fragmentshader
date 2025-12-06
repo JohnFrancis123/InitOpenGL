@@ -12,19 +12,19 @@ uniform int tintBlue;
 void main()
 {
 
-    // Use uniforms directly (no unintended scaling) and keep local names for clarity
+    // use uniforms directly (no unintended scaling) and keep local names for clarity
     float freq = frequency;
     float amp = amplitude;
 
-    // Displace horizontally by sine wave using x * frequency + time as phase
-    // Slow down time modulation slightly to reduce rapid changes
+    // displace horizontally by sine wave using x * frequency + time as phase
+    // slow down time modulation slightly to reduce rapid changes
     float phase = time * 0.5;
     float offset = sin(retTexCoord.x * freq + phase) * amp;
     vec2 displacedUV = retTexCoord + vec2(offset, 0.0);
 
-    // Wrap horizontally to avoid edge-clamp artifacts that appear to "shrink"
+    // wrap horizontally to avoid edge-clamp artifacts that appear to shrink
     displacedUV.x = fract(displacedUV.x);
-    // Keep vertical within bounds
+    // keep vertical within bounds
     displacedUV.y = clamp(displacedUV.y, 0.0, 1.0);
 
     vec4 col = texture(ScreenTexture, displacedUV);
