@@ -166,7 +166,7 @@ void Mesh::Create(Shader* _shader, string _file, int _instanceCount) {
 			float radius = (rand() / (float)RAND_MAX) * 50.0f; // decent max spread
 			model = glm::translate(model, dir * radius);
 
-			// apply random orientation per instance (use single random axis + angle instead of three Euler rotations)
+			// apply random orientation per instance
 			glm::vec3 randAxis = glm::normalize(glm::vec3((rand() / (float)RAND_MAX) * 2.0f - 1.0f,
 												 (rand() / (float)RAND_MAX) * 2.0f - 1.0f,
 												 (rand() / (float)RAND_MAX) * 2.0f - 1.0f));
