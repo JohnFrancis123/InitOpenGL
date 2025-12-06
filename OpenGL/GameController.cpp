@@ -148,7 +148,7 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	if(m_resetTransformPressed) {
 		ResetPos(2, _mesh);
 	}
-
+	 //
 	m_mesh = &_mesh;
 
 	// While in transform mode, apply mouse-driven transforms
