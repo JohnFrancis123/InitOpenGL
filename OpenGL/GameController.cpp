@@ -118,26 +118,45 @@ void GameController::PrepMesh(Mesh& _mesh, const std::string& _defaultName, bool
 }
 
 // New unified transform applier
-void GameController::ApplyXforms(Mesh& _mesh, bool isMoveLight) {
+void GameController::ApplyXforms(Mesh& _mesh, bool _isMoveLight) {
 	glm::vec2 d = GetMouseClickDirection() * 0.01f;
 
 	// Sensitivities
-	const float transXY = 0.0025f;
-	const float rotXY = 0.05f;
-	const float scaleXY = 0.0015f;
-	const float transZ = 0.01f;
-	const float rotZ = 0.2f;
-	const float scaleZ = 0.000025f;
+	float transXY = 0.0f;
+	float transZ = 0.0f;
+
+	float rotXY = 0.0f;
+	float rotZ = 0.0f;
+
+	float scaleXY = 0.0f;
+	float scaleZ = 0.0f;
+
+	if (_isMoveLight) {
+		transXY = 0.0005f;
+		transZ = 0.0025f;
+	}
+	else {
+		transXY = 0.0025f;
+		transZ = 0.01f;
+	}
+
+	rotXY = 0.05f;
+	rotZ = 0.2f;
+
+	scaleXY = 0.0015f;
+	scaleZ = 0.000025f;
+
 
 	// If caller is MoveLight, only allow position changes
-	if (isMoveLight) {
-		if (m_leftMouseClicked && m_translateEnabled) {
+	if (_isMoveLight) {
+		// For lights we always allow position adjustments while mouse buttons are down
+		if (m_leftMouseClicked) {
 			glm::vec3 p = _mesh.GetPosition();
 			p.x += d.x * transXY;
 			p.y += d.y * transXY;
 			_mesh.SetPosition(p);
 		}
-		if (m_middleMouseClicked && m_translateEnabled) {
+		if (m_middleMouseClicked) {
 			glm::vec3 p = _mesh.GetPosition();
 			p.z += d.y * transZ;
 			_mesh.SetPosition(p);
@@ -190,12 +209,18 @@ void GameController::ApplyXforms(Mesh& _mesh, bool isMoveLight) {
 void GameController::UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	PrepMesh(_mesh, "Fighter", m_resetLightPosPressed);
 
-	ApplyXforms(_mesh, true);
+	// rotate the active model for visual feedback
+	_mesh.SetRotation(_mesh.GetRotation() + glm::vec3(0.2f, 0.0f, 0.0f));
 
+	// Move the first light using the unified transform applier (position-only)
+	if (!Mesh::Lights.empty()) {
+		ApplyXforms(Mesh::Lights[0], true);
+	}
+
+	// Render the active model
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 
-	MoveMeshWithMouse(Mesh::Lights[0], 0.00001f);
-
+	// Render lights
 	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
 		Mesh::Lights[count].Render(m_camera.GetProjection() * m_camera.GetView());
 	}
@@ -367,6 +392,8 @@ void GameController::RunGame() {
 
 	m_modelName = "Fighter";
 
+	string mousePosStr = "";
+
 	string modelStrPos = "";
 	string leftBtnStr = "";
 	string middleBtnStr = "";
@@ -423,10 +450,6 @@ void GameController::RunGame() {
 			UpdateOnLeftMouse();	
 			UpdateOnMiddleMouse();
 
-			//modelStrPos = "";
-			//modelStrRot = "";
-			//modelStrScale = "";
-
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear the screen
 
 			CaptureMouseClickDirection();
@@ -442,8 +465,6 @@ void GameController::RunGame() {
 
 			glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
 
-			//fighter.Render(m_camera.GetProjection() * m_camera.GetView());
-			
 			if (m_moveLight) {
 				UpdateMoveLight(fighter, win, f);
 			}
@@ -482,15 +503,24 @@ void GameController::RunGame() {
 
 		leftBtnStr = "Left Mouse Button: " + string(m_leftMouseClicked ? "Down" : "Up");
 		middleBtnStr = "Middle Mouse Button: " + string(m_middleMouseClicked ? "Down" : "Up");
+		double mx = 0.0;
+		double my = 0.0;
+
+		if (win) glfwGetCursorPos(win, &mx, &my);
 
 
-		f.RenderText(fpsS, 100, 300, 0.5f, { 1.0f, 1.0f, 0.0f }); //font gets rendered IN the post processor for the final
-		
+		// Render HUD texts
+		f.RenderText(fpsS, 100, 300, 0.5f, { 1.0f, 1.0f, 0.0f }); // FPS
+
+
+		mousePosStr = "Mouse Pos: " + to_string((int)mx) + ", " + to_string((int)my);
+
 		f.RenderText(leftBtnStr, 100, 330, 0.5f, { 1.0f, 1.0f, 0.0f });
-		f.RenderText(middleBtnStr, 100, 360, 0.5f, { 1.0f, 1.0f, 0.0f });
-		f.RenderText(modelStrPos, 100, 390, 0.5f, { 1.0f, 1.0f, 0.0f });
-		f.RenderText(modelStrRot, 100, 420, 0.5f, { 1.0f, 1.0f, 0.0f });
-		f.RenderText(modelStrScale, 100, 450, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(mousePosStr, 100, 360, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(middleBtnStr, 100, 390, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(modelStrPos, 100, 420, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(modelStrRot, 100, 450, 0.5f, { 1.0f, 1.0f, 0.0f });
+		f.RenderText(modelStrScale, 100, 480, 0.5f, { 1.0f, 1.0f, 0.0f });
 
 		// update post-processor globals only when in water scene
 		if (m_waterScene) {
