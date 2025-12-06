@@ -35,6 +35,7 @@ void Mesh::Cleanup() {
 	if (m_instanceBuffer != 0) { glDeleteBuffers(1, &m_instanceBuffer); m_instanceBuffer = 0; }
 	m_textureSpecular.Cleanup();
 	m_textureDiffuse.Cleanup();
+	m_textureNormal.Cleanup(); // cleaning up normal map texture
 }
 
 string Mesh::RemoveFolder(string _map) {
