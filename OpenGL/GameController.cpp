@@ -32,13 +32,11 @@ void GameController::Initialize() {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE); // Ensure we can capture the escape key
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Black background
 
-	//glEnable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_CULL_FACE);
-	//glCullFace(GL_BACK);
-	//glFrontFace(GL_CW);
+
 	srand(time(0));
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -147,9 +145,9 @@ void GameController::ApplyXforms(Mesh& _mesh, bool _isMoveLight) {
 	scaleZ = 0.000025f;
 
 
-	// If caller is MoveLight, only allow position changes
+	// if caller is MoveLight, only allow position changes
 	if (_isMoveLight) {
-		// For lights we always allow position adjustments while mouse buttons are down
+		// for lights we always allow position adjustments while mouse buttons are down
 		if (m_leftMouseClicked) {
 			glm::vec3 p = _mesh.GetPosition();
 			p.x += d.x * transXY;
@@ -164,7 +162,7 @@ void GameController::ApplyXforms(Mesh& _mesh, bool _isMoveLight) {
 		return;
 	}
 
-	// Full transform allowed for general models
+	// full transform allowed for general models
 	if (m_leftMouseClicked) {
 		if (m_translateEnabled) {
 			glm::vec3 p = _mesh.GetPosition();
@@ -255,18 +253,19 @@ void GameController::ResetPos(int _option, Mesh& _mesh) {
 }
 
 void GameController::UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
-	// Configure post-processor for this frame
+	
 	if (m_modeSwitchTriggered) {
 		m_modelName = "Fish";
 	}
 
 	m_mesh = &_mesh;
 
+	//configure post-processor for this frame
 	m_postProcessor.SetFrequencyAmplitude(m_frequency, m_amplitude);
 	m_postProcessor.SetTime((float)glfwGetTime());
 	m_postProcessor.SetTintBlue(m_tintBlueEnabled);
 
-	// Render water mesh and lights
+	//render fish mesh and lights
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 	//for (unsigned int i = 0; i < Mesh::Lights.size(); ++i) {
 	//	Mesh::Lights[i].Render(m_camera.GetProjection() * m_camera.GetView());
@@ -296,23 +295,6 @@ void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) 
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 }
 
-void GameController::MoveMeshWithMouse(Mesh& _mesh, float _sens) {
-	//only move while left mouse is held
-	if (!m_leftMouseClicked) return;
-
-	//get the current mouse click direction (relative to center)
-	glm::vec2 dir = GetMouseClickDirection();
-
-	//converting screen-space delta to world-space translation factor
-	//small sensitivity so movement isn't too fast
-
-	//applying movement on X and Y axes (Y inverted already in CaptureMouseClickDirection)
-	glm::vec3 pos = _mesh.GetPosition();
-	pos.x += dir.x * _sens;
-	pos.y += dir.y * _sens;
-	_mesh.SetPosition(pos);
-}
-
 void GameController::RunGame() {
 	// Show the C++/CLI tool window
 	OpenGL::ToolWindow^ window = gcnew OpenGL::ToolWindow();
@@ -330,8 +312,7 @@ void GameController::RunGame() {
 	m_shaderPost = Shader();
 	m_shaderPost.LoadShaders("PostProcessor.vertexshader", "PostProcessor.fragmentshader");
 
-	m_shaderSkybox = Shader();
-	m_shaderSkybox.LoadShaders("Skybox.vertexshader", "Skybox.fragmentshader");
+	// skybox shader already loaded above, no need to load it again
 #pragma endregion SetupShaders
 
 #pragma region CreateMeshes
@@ -446,7 +427,7 @@ void GameController::RunGame() {
 				m_modeSwitchTriggered = false;
 			}
 
-			// Update mouse button states and capture direction accordingly
+			//update mouse button states and capture direction accordingly
 			UpdateOnLeftMouse();	
 			UpdateOnMiddleMouse();
 
@@ -454,7 +435,7 @@ void GameController::RunGame() {
 
 			CaptureMouseClickDirection();
 
-			// set tint only when in water scene and UI requests it
+			//set tint only when in water scene and UI requests it
 			if (m_waterScene && m_tintBlueEnabled) {
 				m_postProcessor.SetTintBlue(true);
 			} else {
@@ -534,9 +515,6 @@ void GameController::RunGame() {
 		}
 
 		m_postProcessor.End();
-
-		// Ensure tint is cleared after rendering
-		m_postProcessor.SetTintBlue(false);
 
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input

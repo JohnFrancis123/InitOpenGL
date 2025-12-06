@@ -21,12 +21,12 @@ public:
 	void Initialize();
 	void RunGame();
 
-	// Returns the last mouse-click direction (stored in m_mouseClickDirection). Calls will update this when a click occurs.
+	//returns the last mouse-click direction (stored in m_mouseClickDirection). Calls will update this when a click occurs.
 	glm::vec2 GetMouseClickDirection();
-	// Simple getter to retrieve the stored mouse click direction without changing it
+	//simple getter to retrieve the stored mouse click direction without changing it
 	glm::vec2 GetStoredMouseClickVector() const		{ return m_mouseClickDirection; }
 
-	// Update functions for mouse buttons; call these from your update loop
+	//update functions for mouse buttons; call these from your update loop
 	void UpdateOnLeftMouse();
 	void UpdateOnMiddleMouse();
 
@@ -34,8 +34,6 @@ public:
 	void UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 	void UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 	void UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
-
-	void MoveMeshWithMouse(Mesh& _mesh, float _sens);
 
 	void ResetPos(int _option, Mesh& _mesh); //Final Exam
 
@@ -80,23 +78,22 @@ private:
 	bool m_leftMouseClicked = false;
 	bool m_middleMouseClicked = false;
 
-	// one-shot mode switch tracking
+	// mode switch tracking
 	int m_prevMode = -1; // -1 = none, 0=moveLight,1=transform,2=water,3=space
 	bool m_modeSwitchTriggered = false;
-	// Helper to capture cursor vector relative to center
 
 	Mesh* m_mesh;
 
 	glm::vec3 m_specularColor;
 	void CaptureMouseClickDirection();
 
-	// Consolidated mouse helper to update button state and capture direction
+	//mouse helper to update button state and capture direction
 	void UpdateBtnState(int _glfwButton, bool& _stateFlag);
 
-	// Consolidated helper to prepare mesh when mode switches or reset requested
+	//elper to prepare mesh when mode switches or reset requested
 	void PrepMesh(Mesh& _mesh, const std::string& _defaultName, bool _resetRequested);
 
-	// Consolidated mouse-driven transform applier (used by Transform and MoveLight)
+	//mouse driven transform applier (used by Transform and MoveLight)
 	void ApplyXforms(Mesh& _mesh, bool isMoveLight);
 };
 
