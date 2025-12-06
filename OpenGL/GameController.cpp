@@ -8,12 +8,10 @@ GameController::GameController() {
 	m_shaderDiffuse = { };
 	m_camera = { };
 	m_meshes.clear();
-	m_meshLight = { };
 	m_shaderFont = { };
 	m_shaderPost = { };
 
 	m_specularColor = { 1.0f, 1.0f, 1.0f };
-	m_changed = false;
 
 	m_translateEnabled = false;
 	m_wireframeEnabled = false;
@@ -212,7 +210,7 @@ void GameController::UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 
 	ApplyXforms(_mesh, false);
 
-	// Render after applying transforms
+	//rendering after applying transforms
 	_mesh.Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
 
 	for (unsigned int count = 0; count < Mesh::Lights.size(); count++) {
@@ -224,7 +222,7 @@ void GameController::ResetPos(int _option, Mesh& _mesh) {
 	if (_option == 1) { //reset light pos
 		_mesh.SetPosition({ 0.0f, 0.3f, 1.0f });
 	}
-	if (_option == 2) { // reset transformation
+	if (_option == 2) { //reset transformation
 		_mesh.SetScale({ 0.0008f, 0.0008f, 0.0008f });
 		_mesh.SetPosition({ 0.0f, 0.0f, 0.0f });
 		_mesh.SetRotation({ 45.0f, 0.0f, 0.0f });
@@ -254,7 +252,7 @@ void GameController::UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) 
 }
 
 
-void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, Skybox& _skybox) {
+void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f) {
 	if (m_modeSwitchTriggered) {
 		_mesh.SetRotation({ 0.0f, 0.0f, 0.0f });
 		m_modelName = "Fighter";
@@ -264,7 +262,7 @@ void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, 
 
 	m_camera.Rotate();
 	glm::mat4 view = glm::mat4(glm::mat3(m_camera.GetView()));
-	_skybox.Render(m_camera.GetProjection() * view);
+	m_skybox.Render(m_camera.GetProjection() * view);
 
 	for (unsigned int count = 0; count < m_meshes.size(); count++) {
 		m_meshes[count].Render(m_camera.GetProjection() * m_camera.GetView(), m_specularStrength, m_specularColor);
@@ -274,16 +272,16 @@ void GameController::UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, 
 }
 
 void GameController::MoveMeshWithMouse(Mesh& _mesh, float _sens) {
-	// Only move while left mouse is held
+	//only move while left mouse is held
 	if (!m_leftMouseClicked) return;
 
-	// Get the current mouse click direction (relative to center)
+	//get the current mouse click direction (relative to center)
 	glm::vec2 dir = GetMouseClickDirection();
 
-	// Convert screen-space delta to world-space translation factor
-	// Small sensitivity so movement isn't too fast
+	//converting screen-space delta to world-space translation factor
+	//small sensitivity so movement isn't too fast
 
-	// Apply movement on X and Y axes (Y inverted already in CaptureMouseClickDirection)
+	//applying movement on X and Y axes (Y inverted already in CaptureMouseClickDirection)
 	glm::vec3 pos = _mesh.GetPosition();
 	pos.x += dir.x * _sens;
 	pos.y += dir.y * _sens;
@@ -312,8 +310,8 @@ void GameController::RunGame() {
 #pragma endregion SetupShaders
 
 #pragma region CreateMeshes
-	Skybox skybox = Skybox();
-	skybox.Create(&m_shaderSkybox, "../Assets/Models/Skybox.obj",
+	// Create skybox using member m_skybox
+	m_skybox.Create(&m_shaderSkybox, "../Assets/Models/Skybox.obj",
 		{ "../Assets/Textures/Skybox/right.jpg",
 		  "../Assets/Textures/Skybox/left.jpg",
 		  "../Assets/Textures/Skybox/top.jpg",
@@ -456,7 +454,7 @@ void GameController::RunGame() {
 				UpdateWaterScene(fish, win, f);
 			}
 			else if (m_spaceScene) {
-				UpdateSpaceScene(fighter, win, f, skybox);
+				UpdateSpaceScene(fighter, win, f);
 			}
 
 			if (m_modeSwitchTriggered) {
@@ -509,15 +507,6 @@ void GameController::RunGame() {
 
 		// Ensure tint is cleared after rendering
 		m_postProcessor.SetTintBlue(false);
-		
-
-		//f.RenderText("HELLO", 100, 100, 0.5f, {1.0f, 1.0f, 0.0f});
-
-		//f.RenderText("Testing Text", 10, 500, 0.5f, { 1.0f, 1.0f, 0.0f });
-
-		//f.RenderText("Testing Text", 10, 700, 0.5f, { 1.0f, 0.0f, 0.0f });
-
-		//f.RenderText("Testing Text", 800, 700, 0.5f, { 1.0f, 1.0f, 1.0f });
 
 		glfwSwapBuffers(WindowController::GetInstance().GetWindow()); //swaping the back buffer to the front to display the rendered image
 		glfwPollEvents(); //polling for events, such as keyboard and mouse input

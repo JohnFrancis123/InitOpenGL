@@ -33,7 +33,7 @@ public:
 	void UpdateMoveLight(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 	void UpdateTransform(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 	void UpdateWaterScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
-	void UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f, Skybox& _skybox);
+	void UpdateSpaceScene(Mesh& _mesh, GLFWwindow* _win, Fonts& _f);
 
 	void MoveMeshWithMouse(Mesh& _mesh, float _sens);
 
@@ -50,7 +50,6 @@ private:
 	Camera m_camera;
 	PostProcessor m_postProcessor;
 	vector<Mesh> m_meshes;
-	Mesh m_meshLight;
 	Skybox m_skybox;
 	GLuint vao;
 
@@ -63,9 +62,6 @@ private:
 	bool m_resetTransformPressed = false;
 
 	int m_specularStrength = 0;
-	float m_specularColorR = 1.0f;
-	float m_specularColorG = 1.0f;
-	float m_specularColorB = 1.0f;
 	float m_frequency = 0.0f;
 	float m_amplitude = 0.0f;
 
@@ -84,8 +80,6 @@ private:
 	bool m_leftMouseClicked = false;
 	bool m_middleMouseClicked = false;
 
-	bool m_currState[4];
-	bool m_changed = false;
 	// one-shot mode switch tracking
 	int m_prevMode = -1; // -1 = none, 0=moveLight,1=transform,2=water,3=space
 	bool m_modeSwitchTriggered = false;
