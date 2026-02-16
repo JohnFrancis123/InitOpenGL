@@ -110,10 +110,6 @@ Resolution settings can be configured through the `Resolution.h` header.
 
 This project is available for educational purposes.
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
-
 ## Author
 
 John Francis
