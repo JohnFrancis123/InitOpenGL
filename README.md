@@ -18,8 +18,7 @@ A C++ OpenGL graphics application featuring advanced rendering techniques, camer
 
 ## Prerequisites
 
-- **Visual Studio 2017 or later** (Windows)
-- **C++11 or higher** compatible compiler
+- **Visual Studio 2017 or later** (Windows) - includes C++11 compatible compiler
 - **CMake** (optional, for building external libraries)
 
 ## Dependencies
